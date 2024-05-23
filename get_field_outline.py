@@ -14,8 +14,14 @@ def get_field_outline(path : str, precision : int = 5):
     upper_wood = np.array([30, 255, 255])
 
     hardwood_mask = cv2.inRange(hsv_image, lower_wood, upper_wood)
+    
+    kernel = np.ones((5, 5), np.uint8)
+    cleaned_mask = cv2.morphologyEx(hardwood_mask, cv2.MORPH_CLOSE, kernel)
+    cleaned_mask = cv2.morphologyEx(cleaned_mask, cv2.MORPH_OPEN, kernel)
 
-    cv2.imshow("Mask", hardwood_mask)
+    edges = cv2.Canny(cleaned_mask, 50, 150)
+
+    cv2.imshow("Mask", edges)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
