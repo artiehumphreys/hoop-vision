@@ -5,8 +5,7 @@ from io import BytesIO
 from dotenv import load_dotenv
 import os
 import cv2
-import detect_shot
-
+from detection import detect_shot
 load_dotenv()
 api_key = os.getenv('ROBOFLOW_API_KEY')
 

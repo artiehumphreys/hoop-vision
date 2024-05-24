@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from detection import detect_players
-import draw_basketball_court as court
+from detection import detect_players as detect
+from modeling import draw_basketball_court as court
 
 def plot_player_positions(img_str, player_positions):
     fig, ax = plt.subplots(figsize=(10, 7))
     project_id = 'basketball_court_segmentation'
     model_id = 2
-    predictions = detect_players.make_request(img_str, project_id, model_id)
+    predictions = detect.make_request(img_str, project_id, model_id)
     for prediction in predictions['predictions']:
         points = [(point['x'], point['y']) for point in prediction['points']]
         if prediction['class'] == 'two_point_area':
