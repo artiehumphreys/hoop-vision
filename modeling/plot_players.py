@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from detection import detect_players as detect
-from modeling import draw_basketball_court as court
 
 def plot_player_positions(img_str, player_positions):
     court_positions = []
