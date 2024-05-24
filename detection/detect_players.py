@@ -13,7 +13,7 @@ img_width = 0
 img_height = 0
 
 def make_request(img_str, project_id : str, model_id : int = 1):
-    confidence = 0.5
+    confidence = 0.55
     iou_thresh = 0.5
     # https://inference.roboflow.com/quickstart/run_model_on_image/#run-inference-on-a-v1-route
     api_url = f'https://detect.roboflow.com/{project_id}/{model_id}?api_key={api_key}&confidence={confidence}&overlap={iou_thresh}'
