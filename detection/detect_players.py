@@ -59,7 +59,7 @@ def detect_players_with_roboflow(image_path: str):
     for prediction in predictions["predictions"]:
         width = int(prediction["width"])
         height = int(prediction["height"])
-        x = int(prediction["x"])
+        x = int(prediction["x"] + width / 2)
         y = int(prediction["y"] + height / 2)
         match prediction["class"]:
             case "ball":
