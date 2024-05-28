@@ -68,34 +68,34 @@ def detect_players_with_roboflow(image_path: str):
                 rim_y = prediction["y"]
             case _:
                 player_positions.append((x, y))
-        cv2.rectangle(
-            image,
-            (int(x + width / 2), y),
-            (int(x - width / 2), int(y - height)),
-            (0, 255, 0),
-            2,
-        )
-        cv2.putText(
-            image,
-            f"{prediction['class']} {str(round(prediction['confidence'], 2))}",
-            (int(x - width), int(y - height) - 10),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
-            (0, 255, 0),
-            2,
-        )
-    if rim_y and ball_y:
-        shot = detect_shot.detect_shot(rim_y, ball_y)
-    cv2.putText(
-        image,
-        f"Shot: {str(shot)}",
-        (10, 10),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.5,
-        (0, 255, 0),
-        2,
-    )
-    cv2.imshow("Original Image with Detected Players", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    #     cv2.rectangle(
+    #         image,
+    #         (int(x + width / 2), y),
+    #         (int(x - width / 2), int(y - height)),
+    #         (0, 255, 0),
+    #         2,
+    #     )
+    #     cv2.putText(
+    #         image,
+    #         f"{prediction['class']} {str(round(prediction['confidence'], 2))}",
+    #         (int(x - width), int(y - height) - 10),
+    #         cv2.FONT_HERSHEY_SIMPLEX,
+    #         0.5,
+    #         (0, 255, 0),
+    #         2,
+    #     )
+    # if rim_y and ball_y:
+    #     shot = detect_shot.detect_shot(rim_y, ball_y)
+    # cv2.putText(
+    #     image,
+    #     f"Shot: {str(shot)}",
+    #     (10, 10),
+    #     cv2.FONT_HERSHEY_SIMPLEX,
+    #     0.5,
+    #     (0, 255, 0),
+    #     2,
+    # )
+    # cv2.imshow("Original Image with Detected Players", image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     return img_str, player_positions

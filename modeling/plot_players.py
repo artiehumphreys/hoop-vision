@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from detection import detect_players as detect
-import numpy as np
+from homography import calculate_points as cp
 
 
 def plot_player_positions(img_str, player_positions):
@@ -30,6 +30,8 @@ def plot_player_positions(img_str, player_positions):
     ax.set_aspect("equal", adjustable="box")
     for pos in player_positions:
         ax.plot(pos[0], pos[1], "o", markersize=10, color="blue")
+    for corner in cp.fetch_points_for_homography(img_str):
+        ax.plot(corner[0], corner[1], "o", markersize=10, color="red")
     plt.gca().invert_yaxis()
     # plt.legend()
     plt.title("Basketball Court Areas")

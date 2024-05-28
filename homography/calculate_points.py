@@ -29,4 +29,4 @@ def fetch_points_for_homography(img_str):
             highest_point = min(points, key=lambda p: p[1])
             right_most_point = max(points, key=lambda p: p[0])
             left_most_point = min(points, key=lambda p: p[0])
-    return lowest_point, highest_point, right_most_point, left_most_point
+    return [lowest_point, highest_point, right_most_point, left_most_point]
