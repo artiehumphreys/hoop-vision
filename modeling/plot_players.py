@@ -4,7 +4,7 @@ from detection import detect_players as detect
 
 
 def plot_player_positions(img_str, player_positions):
-    left_most_point = None
+    lowest_point = None
     court_positions = []
     _, ax = plt.subplots(figsize=(10, 7))
     project_id = "basketball_court_segmentation"
@@ -17,11 +17,11 @@ def plot_player_positions(img_str, player_positions):
                 color = "blue"
             case "three_second_area":
                 color = "red"
-                current_left_most = min(points, key=lambda p: p[0])
-                if left_most_point is None:
-                    left_most_point = current_left_most
-                elif current_left_most[0] < left_most_point[0]:
-                    left_most_point = current_left_most
+                current_lowest = max(points, key=lambda p: p[1])
+                if lowest_point is None:
+                    lowest_point = current_lowest
+                elif current_lowest[0] > lowest_point[0]:
+                    lowest_point = current_lowest
             case "court":
                 color = "green"
             case _:
@@ -40,10 +40,8 @@ def plot_player_positions(img_str, player_positions):
     ax.set_aspect("equal", adjustable="box")
     for pos in court_positions:
         ax.plot(pos[0], pos[1], "o", markersize=10, color="blue")
-    if left_most_point:
-        ax.plot(
-            left_most_point[0], left_most_point[1], "o", markersize=10, color="blue"
-        )
+    if lowest_point:
+        ax.plot(lowest_point[0], lowest_point[1], "o", markersize=10, color="red")
     plt.gca().invert_yaxis()
     # plt.legend()
     plt.title("Basketball Court Areas")
