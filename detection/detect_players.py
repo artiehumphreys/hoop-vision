@@ -86,8 +86,16 @@ def detect_players_with_roboflow(image_path: str):
         )
     if rim_y and ball_y:
         shot = detect_shot.detect_shot(rim_y, ball_y)
-    # cv2.putText(image, f'Shot: {str(shot)}', (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-    # cv2.imshow("Original Image with Detected Players", image)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+    cv2.putText(
+        image,
+        f"Shot: {str(shot)}",
+        (10, 10),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        (0, 255, 0),
+        2,
+    )
+    cv2.imshow("Original Image with Detected Players", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
     return img_str, player_positions

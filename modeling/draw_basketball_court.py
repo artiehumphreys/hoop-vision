@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Rectangle, Arc
+from homography import calculate_points as cp
 
 
 # http://savvastjortjoglou.com/nba-shot-sharts.html
@@ -72,6 +73,15 @@ def draw_basketball_court(color="black", lw=2):
     plt.xlim(-250, 250)
     plt.ylim(-50, 470)
     plt.axis("off")
-    plt.show()
 
     return ax
+
+
+def plot_transformed_positions(player_positions, court_corners, camera_corners):
+    ax = draw_basketball_court()
+    H = cp.calculate_homography(camera_corners, court_corners)
+    transformed_positions = cp.apply_homography(H, player_positions)
+    for pos in transformed_positions:
+        plt.plot(pos[0], pos[1], "o", markersize=10, color="blue")
+
+    plt.show()
