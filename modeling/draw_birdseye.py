@@ -5,16 +5,17 @@ from homography import calculate_points as cp
 
 # http://savvastjortjoglou.com/nba-shot-sharts.html
 def draw_basketball_court(color="black", lw=2):
-    ax = plt.gca()
-    hoop = Circle((0, 0), radius=7.5, linewidth=lw, color=color, fill=False)
+    fig, ax = plt.subplots(figsize=(12.8, 7.2))
 
-    backboard = Rectangle((-30, -7.5), 60, -1, linewidth=lw, color=color)
+    hoop = Circle((250, 50), radius=7.5, linewidth=lw, color=color, fill=False)
 
-    outer_box = Rectangle((-80, -47.5), 160, 190, linewidth=lw, color=color, fill=False)
-    inner_box = Rectangle((-60, -47.5), 120, 190, linewidth=lw, color=color, fill=False)
+    backboard = Rectangle((220, 42.5), 60, -1, linewidth=lw, color=color)
+
+    outer_box = Rectangle((170, 2.5), 160, 190, linewidth=lw, color=color, fill=False)
+    inner_box = Rectangle((190, 2.5), 120, 190, linewidth=lw, color=color, fill=False)
 
     top_free_throw = Arc(
-        (0, 142.5),
+        (250, 192.5),
         120,
         120,
         theta1=0,
@@ -24,7 +25,7 @@ def draw_basketball_court(color="black", lw=2):
         fill=False,
     )
     bottom_free_throw = Arc(
-        (0, 142.5),
+        (250, 192.5),
         120,
         120,
         theta1=180,
@@ -33,18 +34,20 @@ def draw_basketball_court(color="black", lw=2):
         color=color,
         linestyle="dashed",
     )
-    restricted = Arc((0, 0), 80, 80, theta1=0, theta2=180, linewidth=lw, color=color)
+    restricted = Arc((250, 50), 80, 80, theta1=0, theta2=180, linewidth=lw, color=color)
 
-    corner_three_a = Rectangle((-220, -47.5), 0, 140, linewidth=lw, color=color)
-    corner_three_b = Rectangle((220, -47.5), 0, 140, linewidth=lw, color=color)
+    corner_three_a = Rectangle((30, 2.5), 0, 140, linewidth=lw, color=color)
+    corner_three_b = Rectangle((470, 2.5), 0, 140, linewidth=lw, color=color)
 
-    three_arc = Arc((0, 0), 475, 475, theta1=22, theta2=158, linewidth=lw, color=color)
+    three_arc = Arc(
+        (250, 50), 475, 475, theta1=22, theta2=158, linewidth=lw, color=color
+    )
 
     center_outer_arc = Arc(
-        (0, 422.5), 120, 120, theta1=180, theta2=0, linewidth=lw, color=color
+        (250, 472.5), 120, 120, theta1=180, theta2=0, linewidth=lw, color=color
     )
     center_inner_arc = Arc(
-        (0, 422.5), 40, 40, theta1=180, theta2=0, linewidth=lw, color=color
+        (250, 472.5), 40, 40, theta1=180, theta2=0, linewidth=lw, color=color
     )
 
     court_elements = [
@@ -62,17 +65,17 @@ def draw_basketball_court(color="black", lw=2):
         center_inner_arc,
     ]
 
-    outer_lines = Rectangle(
-        (-250, -47.5), 500, 470, linewidth=lw, color=color, fill=False
-    )
+    outer_lines = Rectangle((0, 2.5), 500, 470, linewidth=lw, color=color, fill=False)
     court_elements.append(outer_lines)
 
     for element in court_elements:
         ax.add_patch(element)
 
-    plt.xlim(-250, 250)
-    plt.ylim(-50, 470)
+    plt.xlim(0, 500)
+    plt.ylim(0, 475)
     plt.axis("on")
+
+    plt.gca().set_aspect("equal", adjustable="box")
 
     return ax
 
