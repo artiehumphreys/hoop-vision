@@ -9,9 +9,9 @@ def main():
     img_path = "data/frame30.jpg"
     # pp.extract_frames(5)
     decoded_img, player_positions = dp.detect_players_with_roboflow(image_path=img_path)
-    pp.plot_player_positions(decoded_img, player_positions)
-    camera_view_corners = cp.fetch_points_for_homography(decoded_img)
-    db.plot_transformed_positions(player_positions, camera_view_corners, court_corners)
+    pp.get_court_bound(decoded_img, player_positions)
+    # camera_view_corners = cp.fetch_points_for_homography(decoded_img)
+    # db.plot_transformed_positions(player_positions, camera_view_corners, court_corners)
 
 
 if __name__ == "__main__":
