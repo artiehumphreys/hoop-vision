@@ -54,6 +54,7 @@ def detect_players_with_mask_crnn(image_path: str):
 
     max_box_area = 4750
     box_areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
+    box_y = boxes[:, 1]
     individual_indices = box_areas > max_box_area
     masks = masks[individual_indices]
     boxes = boxes[individual_indices]
@@ -72,73 +73,3 @@ def detect_players_with_mask_crnn(image_path: str):
     cv2.imshow("Players Detected", final_img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-
-# rim_y = None
-# ball_y = None
-# player_positions = []
-# image = cv2.imread(image_path)
-# if image is None:
-#     print("Couldn't load image")
-#     return
-
-# img = Image.open(image_path)
-
-# buffered = BytesIO()
-
-# img.save(buffered, quality=100, format="JPEG")
-
-# img_bytes = base64.b64encode(buffered.getvalue())
-# img_str = img_bytes.decode("ascii")
-
-# project_id = "basketball-w2xcw"
-# model_id = 1
-
-# predictions = make_request(img_str, project_id, model_id)
-
-# # https://universe.roboflow.com/ownprojects/basketball-w2xcw/model/1
-# shot = False
-
-# for prediction in predictions["predictions"]:
-#     width = int(prediction["width"])
-#     height = int(prediction["height"])
-#     x = int(prediction["x"] + width / 2)
-#     y = int(prediction["y"] + height / 2)
-#     match prediction["class"]:
-#         case "ball":
-#             ball_y = prediction["y"]
-#         case "rim":
-#             rim_y = prediction["y"]
-#         case _:
-#             player_positions.append((x, y))
-# #     cv2.rectangle(
-# #         image,
-# #         (int(x + width / 2), y),
-# #         (int(x - width / 2), int(y - height)),
-# #         (0, 255, 0),
-# #         2,
-# #     )
-# #     cv2.putText(
-# #         image,
-# #         f"{prediction['class']} {str(round(prediction['confidence'], 2))}",
-# #         (int(x - width), int(y - height) - 10),
-# #         cv2.FONT_HERSHEY_SIMPLEX,
-# #         0.5,
-# #         (0, 255, 0),
-# #         2,
-# #     )
-# # if rim_y and ball_y:
-# #     shot = detect_shot.detect_shot(rim_y, ball_y)
-# # cv2.putText(
-# #     image,
-# #     f"Shot: {str(shot)}",
-# #     (10, 10),
-# #     cv2.FONT_HERSHEY_SIMPLEX,
-# #     0.5,
-# #     (0, 255, 0),
-# #     2,
-# # )
-# # cv2.imshow("Original Image with Detected Players", image)
-# # cv2.waitKey(0)
-# # cv2.destroyAllWindows()
-# return img_str, player_positions
