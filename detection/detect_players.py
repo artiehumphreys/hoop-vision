@@ -1,7 +1,6 @@
 import base64
 import requests
 from PIL import Image
-from io import BytesIO
 from dotenv import load_dotenv
 import os
 import cv2
@@ -36,7 +35,9 @@ def make_request(img_str, project_id: str, model_id: int = 1):
 
 
 def detect_players_with_mask_crnn(image_path: str):
-    model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(weights="DEFAULT")
+    model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(
+        weights=torchvision.models.detection.MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1
+    )
     model.eval()
     img = Image.open(image_path)
     transform = T.ToTensor()
@@ -52,12 +53,14 @@ def detect_players_with_mask_crnn(image_path: str):
     boxes = pred[0]["boxes"][high_conf_indices][player_indices]
     masks = pred[0]["masks"][high_conf_indices][player_indices]
 
-    max_box_area = 4750
-    box_areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
-    box_y = boxes[:, 1]
-    individual_indices = box_areas > max_box_area
-    masks = masks[individual_indices]
-    boxes = boxes[individual_indices]
+    box_height = boxes[:, 3] - boxes[:, 1]
+    box_width = boxes[:, 2] - boxes[:, 0]
+    min_height = 90
+    min_width = 60
+    # TODO: Use roboflow to detect court boundaries
+    filtered_boxes = (box_width >= min_width) & (box_height >= min_height)
+    masks = masks[filtered_boxes]
+    boxes = boxes[filtered_boxes]
 
     original_img = cv2.imread(image_path)
     final_img = original_img.copy()

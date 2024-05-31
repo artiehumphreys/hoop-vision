@@ -6,7 +6,7 @@ from homography import calculate_points as cp
 
 def main():
     court_corners = [(190, 192.5), (310, 2.5), (310, 2.5), (190, 2.5)]
-    img_path = "data/frame40.jpg"
+    img_path = "data/frame50.jpg"
     # # pp.extract_frames(5)
     # decoded_img, player_positions = dp.detect_players_with_roboflow(image_path=img_path)
     # pp.plot_player_positions(decoded_img, player_positions)

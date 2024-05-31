@@ -32,7 +32,15 @@ def plot_player_positions(img_str, player_positions):
         ax.plot(pos[0], pos[1], "o", markersize=10, color="blue")
     for corner in cp.fetch_points_for_homography(img_str):
         ax.plot(corner[0], corner[1], "o", markersize=10, color="red")
+
     plt.gca().invert_yaxis()
     # plt.legend()
     plt.title("Basketball Court Areas")
     plt.show()
+
+def fetch_court_position(img_str):
+    project_id = "basketball_court_segmentation"
+    model_id = 2
+    predictions = detect.make_request(img_str, project_id, model_id)
+    for prediction in predictions["predictions"]:
+        
