@@ -148,8 +148,10 @@ def detect_players_with_mask_crnn(image_path: str):
     boxes = pred[0]["boxes"][high_conf_indices][player_indices]
     masks = pred[0]["masks"][high_conf_indices][player_indices]
 
+    epsilon = 5
+
     player_positions = [
-        (boxes[i, 2].item(), boxes[i, 3].item())
+        (boxes[i, 2].item(), boxes[i, 3].item() + epsilon)
         for i in range(len(boxes))
         # if boxes[i, 3] - boxes[i, 1] > 60
     ]
