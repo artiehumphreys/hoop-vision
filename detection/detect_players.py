@@ -57,11 +57,13 @@ def detect_players_with_roboflow(image_path: str):
     # https://universe.roboflow.com/ownprojects/basketball-w2xcw/model/1
     shot = False
 
+    epsilon = 10
+
     for prediction in predictions["predictions"]:
         width = int(prediction["width"])
         height = int(prediction["height"])
         x = int(prediction["x"] + width / 2)
-        y = int(prediction["y"] + height / 2)
+        y = int(prediction["y"] + height / 2 - epsilon)
         match prediction["class"]:
             case "ball":
                 ball_y = prediction["y"]
@@ -80,15 +82,15 @@ def detect_players_with_roboflow(image_path: str):
             height = player_positions[i][3]
             cv2.rectangle(
                 image,
-                (int(x), int(y)),
-                (int(x - width), int(y - height)),
+                (int(x), int(y + epsilon)),
+                (int(x - width), int(y - height + epsilon)),
                 (0, 255, 0),
                 2,
             )
             cv2.putText(
                 image,
                 "Player",
-                (int(x - width / 2), int(y - height / 2) - 10),
+                (int(x - 10), int(y - 10) - 10),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
                 (0, 255, 0),
