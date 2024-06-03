@@ -9,32 +9,34 @@ import base64
 from collections import defaultdict
 
 
-def get_court_bound(image_path):
+def is_in_court(img_str, player_positions):
     _, ax = plt.subplots(figsize=(10, 7))
-    image = cv2.imread(image_path)
-    if image is None:
-        print("Couldn't load image")
-        return
-
-    img = Image.open(image_path)
-
-    buffered = BytesIO()
-
-    img.save(buffered, quality=100, format="JPEG")
-
-    img_bytes = base64.b64encode(buffered.getvalue())
-    img_str = img_bytes.decode("ascii")
     project_id = "basketball_court_segmentation"
     model_id = 2
     predictions = detect.make_request(img_str, project_id, model_id)
-    bounds = defaultdict(list)
-
+    points = []
     for prediction in predictions["predictions"]:
-        if prediction["class"] == "court":
-            for point in prediction["points"]:
-                bounds[point["x"]].append(point["y"])
+        points += [(point["x"], point["y"]) for point in prediction["points"]]
 
-    # Determine the minimum and maximum `y` values for each `x` coordinate
-    bounds = {x: (min(y_values), max(y_values)) for x, y_values in bounds.items()}
+    num = len(points)
+    j = num - 1
+    in_court = []
+    for player_position in player_positions:
+        inside = False
+        x = player_position[0]
+        y = player_position[1]
 
-    return bounds
+        for i in range(num):
+            xi, yi = points[i]
+            xj, yj = points[j]
+
+            intersect = ((yi > y) != (yj > y)) and (
+                x < (xj - xi) * (y - yi) / (yj - yi) + xi
+            )
+            if intersect:
+                inside = not inside
+            j = i
+
+        in_court.append(inside)
+
+    return in_court

@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 import cv2
 from detection import detect_shot
+from modeling import plot_players as pp
 
 load_dotenv()
 api_key = os.getenv("ROBOFLOW_API_KEY")
@@ -30,7 +31,7 @@ def make_request(img_str, project_id: str, model_id: int = 1):
     return response.json()
 
 
-def detect_players_with_roboflow(image_path: str, court_bounds):
+def detect_players_with_roboflow(image_path: str):
     rim_y = None
     ball_y = None
     player_positions = []
@@ -59,47 +60,40 @@ def detect_players_with_roboflow(image_path: str, court_bounds):
     for prediction in predictions["predictions"]:
         width = int(prediction["width"])
         height = int(prediction["height"])
-        x = int(prediction["x"])
-        y = int(prediction["y"])
+        x = int(prediction["x"] + width / 2)
+        y = int(prediction["y"] + height / 2)
         match prediction["class"]:
             case "ball":
                 ball_y = prediction["y"]
             case "rim":
                 rim_y = prediction["y"]
-            case _:
-                if x in court_bounds:
-                    if court_bounds[x][0] <= y <= court_bounds[x][1]:
-                        player_positions.append((x, y))
-                else:
-                    l = r = x
-                    while l not in court_bounds and r not in court_bounds:
-                        l -= 1
-                        r += 1
+            case "person":
+                player_positions.append((x, y, width, height))
 
-                    if (
-                        l in court_bounds
-                        and court_bounds[l][0] <= y <= court_bounds[l][1]
-                    ) or (
-                        r in court_bounds
-                        and court_bounds[r][0] <= y <= court_bounds[r][1]
-                    ):
-                        player_positions.append((x, y))
-        cv2.rectangle(
-            image,
-            (int(x + width / 2), int(y + height / 2)),
-            (int(x - width / 2), int(y - height / 2)),
-            (0, 255, 0),
-            2,
-        )
-        cv2.putText(
-            image,
-            f"{prediction['class']} {str(round(prediction['confidence'], 2))}",
-            (int(x - width / 2), int(y - height / 2) - 10),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
-            (0, 255, 0),
-            2,
-        )
+    in_court = pp.is_in_court(img_str, player_positions)
+
+    for i in range(len(player_positions)):
+        if in_court[i]:
+            x = player_positions[i][0]
+            y = player_positions[i][1]
+            width = player_positions[i][2]
+            height = player_positions[i][3]
+            cv2.rectangle(
+                image,
+                (int(x), int(y)),
+                (int(x - width), int(y - height)),
+                (0, 255, 0),
+                2,
+            )
+            cv2.putText(
+                image,
+                "Player",
+                (int(x - width / 2), int(y - height / 2) - 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 255, 0),
+                2,
+            )
     if rim_y and ball_y:
         shot = detect_shot.detect_shot(rim_y, ball_y)
     cv2.putText(
