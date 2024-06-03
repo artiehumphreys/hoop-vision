@@ -1,12 +1,6 @@
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 from detection import detect_players as detect
 from homography import calculate_points as cp
-from PIL import Image
-from io import BytesIO
-import cv2
-import base64
-from collections import defaultdict
 
 
 def is_in_court(img_str, player_positions):

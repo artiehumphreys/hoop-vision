@@ -10,6 +10,7 @@ import torch
 import torchvision
 from torchvision import transforms as T
 import numpy as np
+from io import BytesIO
 
 load_dotenv()
 api_key = os.getenv("ROBOFLOW_API_KEY")
@@ -108,6 +109,26 @@ def detect_shot_with_ball(image, rim_y, ball_y):
     return shot
 
 
+def detect_players_with_roboflow(image_path: str):
+    try:
+        image, img_str = load_and_encode_image(image_path)
+    except ValueError as e:
+        print(e)
+        return
+
+    project_id = "basketball-w2xcw"
+    model_id = 1
+
+    predictions = make_request(img_str, project_id, model_id)
+    ball_y, rim_y, player_positions = process_predictions(predictions)
+    in_court = pp.is_in_court(img_str, player_positions)
+    draw_players(image, player_positions, in_court)
+    shot = detect_shot_with_ball(image, rim_y, ball_y)
+    display_image(image)
+
+    return img_str, player_positions
+
+
 def detect_players_with_mask_crnn(image_path: str):
     model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(
         weights=torchvision.models.detection.MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1
@@ -127,25 +148,33 @@ def detect_players_with_mask_crnn(image_path: str):
     boxes = pred[0]["boxes"][high_conf_indices][player_indices]
     masks = pred[0]["masks"][high_conf_indices][player_indices]
 
-    box_height = boxes[:, 3] - boxes[:, 1]
-    box_width = boxes[:, 2] - boxes[:, 0]
-    min_height = 90
-    min_width = 60
-    # TODO: Use roboflow to detect court boundaries
-    filtered_boxes = (box_width >= min_width) & (box_height >= min_height)
+    player_positions = [
+        (boxes[i, 2].item(), boxes[i, 3].item())
+        for i in range(len(boxes))
+        # if boxes[i, 3] - boxes[i, 1] > 60
+    ]
+
+    image, img_str = load_and_encode_image(image_path=image_path)
+    in_court = pp.is_in_court(img_str, player_positions)
+
+    filtered_boxes = [i for i in range(len(in_court)) if in_court[i]]
+    filtered_masks = masks[filtered_boxes]
+
     masks = masks[filtered_boxes]
     boxes = boxes[filtered_boxes]
 
     original_img = cv2.imread(image_path)
     final_img = original_img.copy()
 
-    for i in range(masks.shape[0]):
-        mask = masks[i, 0] > 0.5
+    for i in range(filtered_masks.shape[0]):
+        mask = filtered_masks[i, 0] > 0.5
         play_mask = mask.numpy().astype("uint8") * 255
 
         colored_mask = np.zeros_like(original_img)
         colored_mask[:, :, 0] = play_mask
         final_img = cv2.addWeighted(final_img, 1, colored_mask, 0.5, 0)
+
+    display_image(image=final_img)
 
 
 def display_image(image):
