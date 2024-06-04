@@ -191,37 +191,33 @@ def detect_players_with_mask_crnn(image_path: str):
     display_image(image=final_img)
 
 
-def get_teams(mask):
-    hsv = cv2.cvtColor(mask, cv2.COLOR_BGR2HSV)
-    lower_maroon = np.array([0, 50, 50])
-    upper_maroon = np.array([10, 255, 255])
-    lower_maroon2 = np.array([170, 50, 50])
-    upper_maroon2 = np.array([180, 255, 255])
+def get_teams(player_img):
+    player_hsv = cv2.cvtColor(player_img, cv2.COLOR_BGR2HSV)
+    lower_maroon = np.array([0, 31, 255])
+    upper_maroon = np.array([176, 255, 255])
 
-    lower_white = np.array([0, 0, 200])
-    upper_white = np.array([180, 55, 255])
+    lower_white = np.array([0, 0, 0])
+    upper_white = np.array([0, 0, 255])
 
-    mask_maroon = cv2.inRange(hsv, lower_maroon, upper_maroon) | cv2.inRange(
-        hsv, lower_maroon2, upper_maroon2
-    )
-    mask_white = cv2.inRange(hsv, lower_white, upper_white)
+    mask_maroon = cv2.inRange(player_hsv, lower_maroon, upper_maroon)
+    res_maroon = cv2.bitwise_and(player_img, player_img, mask=mask_maroon)
+    res_maroon = cv2.cvtColor(res_maroon, cv2.COLOR_HSV2BGR)
+    res_maroon = cv2.cvtColor(res_maroon, cv2.COLOR_BGR2GRAY)
+    nz_count_maroon = cv2.countNonZero(res_maroon)
 
-    maroon_contours, _ = cv2.findContours(
-        mask_maroon, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
-    )
-    white_contours, _ = cv2.findContours(
-        mask_white, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
-    )
+    # Check for white jersey
+    mask_white = cv2.inRange(player_hsv, lower_white, upper_white)
+    res_white = cv2.bitwise_and(player_img, player_img, mask=mask_white)
+    res_white = cv2.cvtColor(res_white, cv2.COLOR_HSV2BGR)
+    res_white = cv2.cvtColor(res_white, cv2.COLOR_BGR2GRAY)
+    nz_count_white = cv2.countNonZero(res_white)
 
-    for contour in maroon_contours:
-        if cv2.contourArea(contour) > 300:
-            return "maroon"
-
-    for contour in white_contours:
-        if cv2.contourArea(contour) > 300:
-            return "white"
-
-    return "unknown"
+    if nz_count_maroon >= 20:
+        return "maroon"
+    elif nz_count_white >= 20:
+        return "white"
+    else:
+        return "unknown"
 
 
 def display_image(image):
