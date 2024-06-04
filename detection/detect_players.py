@@ -148,35 +148,80 @@ def detect_players_with_mask_crnn(image_path: str):
     boxes = pred[0]["boxes"][high_conf_indices][player_indices]
     masks = pred[0]["masks"][high_conf_indices][player_indices]
 
-    epsilon = 5
-
     player_positions = [
-        (boxes[i, 2].item(), boxes[i, 3].item() + epsilon)
-        for i in range(len(boxes))
-        # if boxes[i, 3] - boxes[i, 1] > 60
+        (boxes[i, 2].item(), boxes[i, 3].item()) for i in range(len(boxes))
     ]
 
-    image, img_str = load_and_encode_image(image_path=image_path)
+    _, img_str = load_and_encode_image(image_path=image_path)
     in_court = pp.is_in_court(img_str, player_positions)
 
-    filtered_boxes = [i for i in range(len(in_court)) if in_court[i]]
+    filtered_boxes = [
+        i
+        for i in range(len(in_court))
+        if in_court[i]
+        # Avoid getting heads from people in the crowd
+        and (boxes[i, 3] - boxes[i, 1]) >= 1.2 * (boxes[i, 2] - boxes[i, 0])
+    ]
     filtered_masks = masks[filtered_boxes]
 
-    masks = masks[filtered_boxes]
     boxes = boxes[filtered_boxes]
 
     original_img = cv2.imread(image_path)
+    original_img_hsv = cv2.cvtColor(original_img, cv2.COLOR_BGR2HSV)
     final_img = original_img.copy()
 
     for i in range(filtered_masks.shape[0]):
         mask = filtered_masks[i, 0] > 0.5
         play_mask = mask.numpy().astype("uint8") * 255
 
+        player_img = cv2.bitwise_and(original_img_hsv, original_img_hsv, mask=play_mask)
         colored_mask = np.zeros_like(original_img)
         colored_mask[:, :, 0] = play_mask
         final_img = cv2.addWeighted(final_img, 1, colored_mask, 0.5, 0)
+        cv2.putText(
+            final_img,
+            get_teams(player_img),
+            (int(boxes[i, 0].item()), int(boxes[i, 1].item())),
+            cv2.FONT_HERSHEY_COMPLEX,
+            0.9,
+            (0, 0, 255),
+            2,
+        )
 
     display_image(image=final_img)
+
+
+def get_teams(mask):
+    hsv = cv2.cvtColor(mask, cv2.COLOR_BGR2HSV)
+    lower_maroon = np.array([0, 50, 50])
+    upper_maroon = np.array([10, 255, 255])
+    lower_maroon2 = np.array([170, 50, 50])
+    upper_maroon2 = np.array([180, 255, 255])
+
+    lower_white = np.array([0, 0, 200])
+    upper_white = np.array([180, 55, 255])
+
+    mask_maroon = cv2.inRange(hsv, lower_maroon, upper_maroon) | cv2.inRange(
+        hsv, lower_maroon2, upper_maroon2
+    )
+    mask_white = cv2.inRange(hsv, lower_white, upper_white)
+
+    maroon_contours, _ = cv2.findContours(
+        mask_maroon, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
+    )
+    white_contours, _ = cv2.findContours(
+        mask_white, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
+    )
+
+    for contour in maroon_contours:
+        if cv2.contourArea(contour) > 300:
+            return "maroon"
+
+    for contour in white_contours:
+        if cv2.contourArea(contour) > 300:
+            return "white"
+
+    return "unknown"
 
 
 def display_image(image):
