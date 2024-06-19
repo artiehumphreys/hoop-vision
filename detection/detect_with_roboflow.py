@@ -3,6 +3,11 @@ import cv2
 from PIL import Image
 import base64
 from io import BytesIO
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+api_key = os.getenv("ROBOFLOW_API_KEY")
 
 
 def make_request(img_str, project_id: str, model_id: int = 1):

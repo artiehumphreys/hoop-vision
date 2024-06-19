@@ -1,5 +1,3 @@
-from dotenv import load_dotenv
-import os
 import cv2
 from detection import detect_jersey, detect_with_roboflow
 import torch
@@ -7,9 +5,6 @@ import torchvision
 from torchvision import transforms as T
 import numpy as np
 from PIL import Image
-
-load_dotenv()
-api_key = os.getenv("ROBOFLOW_API_KEY")
 
 img_width = 0
 img_height = 0
