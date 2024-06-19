@@ -137,21 +137,22 @@ class PlayerDetector:
     def draw_players(self, image, player_positions, in_court):
         epsilon = 10
         for i in range(len(player_positions)):
-            if in_court[i]:
-                x, y, width, height = player_positions[i]
-                cv2.rectangle(
-                    image,
-                    (int(x), int(y + epsilon)),
-                    (int(x - width), int(y - height + epsilon)),
-                    (0, 255, 0),
-                    2,
-                )
-                cv2.putText(
-                    image,
-                    "Player",
-                    (int(x - 10), int(y - 10) - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (0, 255, 0),
-                    2,
-                )
+            if not in_court[i]:
+                continue
+            x, y, width, height = player_positions[i]
+            cv2.rectangle(
+                image,
+                (int(x), int(y + epsilon)),
+                (int(x - width), int(y - height + epsilon)),
+                (0, 255, 0),
+                2,
+            )
+            cv2.putText(
+                image,
+                "Player",
+                (int(x - 10), int(y - 10) - 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 255, 0),
+                2,
+            )
