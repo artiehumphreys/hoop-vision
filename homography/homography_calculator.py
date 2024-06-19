@@ -1,11 +1,11 @@
 import cv2
 import numpy as np
-from detection import detect_players as detect
+from detection import player_detector
 
 
 class HomographyCalculator:
     def __init__(self):
-        pass
+        self.player_detector = player_detector.PlayerDetector()
 
     def calculate_homography(self, src_points, dst_points):
         src_points = np.array(src_points, dtype=np.float32)
@@ -23,7 +23,7 @@ class HomographyCalculator:
         project_id = "basketball_court_segmentation"
         model_id = 2
         lowest_paint = highest_paint = right_most_paint = left_most_paint = None
-        predictions = detect.make_request(img_str, project_id, model_id)
+        predictions = self.player_detector.make_request(img_str, project_id, model_id)
         for prediction in predictions["predictions"]:
             points = [(point["x"], point["y"]) for point in prediction["points"]]
             if prediction["class"] == "three_second_area":

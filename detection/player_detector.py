@@ -4,13 +4,14 @@ import torchvision
 import numpy as np
 from PIL import Image
 from torchvision import transforms as T
-from detection import detect_jersey, roboflow_detector
+from detection import jersey_detector, roboflow_detector
 from pre_processing import image_loader
 
 
 class PlayerDetector:
     def __init__(self):
-        self.roboflow_detector = roboflow_detector.RoboFlowDetector()
+        self.roboflow_detector = roboflow_detector.RoboflowDetector()
+        self.jersey_detector = jersey_detector.JerseyDetector()
 
     def is_in_court(self, img_str, player_positions):
         project_id = "basketball_court_segmentation"
@@ -118,7 +119,7 @@ class PlayerDetector:
             final_img = cv2.addWeighted(final_img, 1, colored_mask, 0.5, 0)
             cv2.putText(
                 final_img,
-                detect_jersey.get_teams_from_jersey(player_img),
+                self.jersey_detector.get_teams_from_jersey(player_img),
                 (int(boxes[i, 0].item()), int(boxes[i, 1].item())),
                 cv2.FONT_HERSHEY_COMPLEX,
                 0.9,
