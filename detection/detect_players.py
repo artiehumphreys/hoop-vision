@@ -4,8 +4,7 @@ from PIL import Image
 from dotenv import load_dotenv
 import os
 import cv2
-from detection import detect_shot
-from modeling import plot_players as pp
+from detection import detect_shot, detect_jersey
 import torch
 import torchvision
 from torchvision import transforms as T
@@ -70,6 +69,38 @@ def process_predictions(predictions):
     return ball_y, rim_y, player_positions
 
 
+def is_in_court(img_str, player_positions):
+    project_id = "basketball_court_segmentation"
+    model_id = 2
+    predictions = make_request(img_str, project_id, model_id)
+    points = []
+    for prediction in predictions["predictions"]:
+        points += [(point["x"], point["y"]) for point in prediction["points"]]
+
+    num = len(points)
+    j = num - 1
+    in_court = []
+    for player_position in player_positions:
+        inside = False
+        x = player_position[0]
+        y = player_position[1]
+
+        for i in range(num):
+            xi, yi = points[i]
+            xj, yj = points[j]
+
+            intersect = ((yi + 5 > y) != (yj + 5 > y)) and (
+                x < (xj - xi) * (y - yi) / (yj - yi) + xi
+            )
+            if intersect:
+                inside = not inside
+            j = i
+
+        in_court.append(inside)
+
+    return in_court
+
+
 def draw_players(image, player_positions, in_court):
     epsilon = 10
     for i in range(len(player_positions)):
@@ -121,7 +152,7 @@ def detect_players_with_roboflow(image_path: str):
 
     predictions = make_request(img_str, project_id, model_id)
     ball_y, rim_y, player_positions = process_predictions(predictions)
-    in_court = pp.is_in_court(img_str, player_positions)
+    in_court = is_in_court(img_str, player_positions)
     draw_players(image, player_positions, in_court)
     shot = detect_shot_with_ball(image, rim_y, ball_y)
     display_image(image)
@@ -153,7 +184,7 @@ def detect_players_with_mask_crnn(image_path: str):
     ]
 
     _, img_str = load_and_encode_image(image_path=image_path)
-    in_court = pp.is_in_court(img_str, player_positions)
+    in_court = is_in_court(img_str, player_positions)
 
     filtered_boxes = [
         i
@@ -180,7 +211,7 @@ def detect_players_with_mask_crnn(image_path: str):
         final_img = cv2.addWeighted(final_img, 1, colored_mask, 0.5, 0)
         cv2.putText(
             final_img,
-            get_teams(player_img),
+            detect_jersey.get_teams_from_jersey(player_img),
             (int(boxes[i, 0].item()), int(boxes[i, 1].item())),
             cv2.FONT_HERSHEY_COMPLEX,
             0.9,
@@ -189,35 +220,6 @@ def detect_players_with_mask_crnn(image_path: str):
         )
 
     display_image(image=final_img)
-
-
-def get_teams(player_img):
-    player_hsv = cv2.cvtColor(player_img, cv2.COLOR_BGR2HLS)
-    lower_maroon = np.array([25, 125, 50])
-    upper_maroon = np.array([200, 255, 255])
-
-    lower_white = np.array([80, 50, 150])
-    upper_white = np.array([200, 150, 255])
-    # Check for maroon jersey
-    mask_maroon = cv2.inRange(player_hsv, lower_maroon, upper_maroon)
-    res_maroon = cv2.bitwise_and(player_img, player_img, mask=mask_maroon)
-    res_maroon = cv2.cvtColor(res_maroon, cv2.COLOR_HLS2BGR)
-    res_maroon = cv2.cvtColor(res_maroon, cv2.COLOR_BGR2GRAY)
-    nz_count_maroon = cv2.countNonZero(res_maroon)
-
-    mask_white = cv2.inRange(player_hsv, lower_white, upper_white)
-    res_white = cv2.bitwise_and(player_img, player_img, mask=mask_white)
-    res_white = cv2.cvtColor(res_white, cv2.COLOR_HLS2BGR)
-    res_white = cv2.cvtColor(res_white, cv2.COLOR_BGR2GRAY)
-    nz_count_white = cv2.countNonZero(res_white)
-
-    # return str(nz_count_maroon) + ", " + str(nz_count_white)
-
-    if abs(nz_count_maroon - nz_count_white) > 1500:
-        return "Referee"
-    elif nz_count_maroon > nz_count_white:
-        return "Cavs"
-    return "Bulls"
 
 
 def display_image(image):

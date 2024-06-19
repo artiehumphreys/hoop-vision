@@ -1,7 +1,4 @@
-from modeling import plot_players as pp
-from modeling import draw_birdseye as db
 from detection import detect_players as dp
-from homography import calculate_points as cp
 
 
 def main():
