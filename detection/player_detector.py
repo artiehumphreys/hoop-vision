@@ -9,9 +9,10 @@ from pre_processing import image_loader
 
 
 class PlayerDetector:
-    def __init__(self):
+    def __init__(self, image_loader):
         self.roboflow_detector = roboflow_detector.RoboflowDetector()
         self.jersey_detector = jersey_detector.JerseyDetector()
+        self.image_loader = image_loader
 
     def is_in_court(self, img_str, player_positions):
         project_id = "basketball_court_segmentation"
@@ -43,11 +44,9 @@ class PlayerDetector:
 
         return in_court
 
-    def detect_players_with_roboflow(self, image_path: str):
+    def detect_players_with_roboflow(self):
         try:
-            image, img_str = image_loader.ImageLoader().load_and_encode_image(
-                image_path
-            )
+            image, img_str = self.image_loader.load_and_encode_image()
         except ValueError as e:
             print(e)
             return
@@ -86,9 +85,7 @@ class PlayerDetector:
             (boxes[i, 2].item(), boxes[i, 3].item()) for i in range(len(boxes))
         ]
 
-        _, img_str = image_loader.ImageLoader().load_and_encode_image(
-            image_path=image_path
-        )
+        _, img_str = self.image_loader.load_and_encode_image()
         in_court = self.is_in_court(img_str, player_positions)
 
         filtered_boxes = [
@@ -100,7 +97,7 @@ class PlayerDetector:
         filtered_masks = masks[filtered_boxes]
         boxes = boxes[filtered_boxes]
 
-        self.process_player_masks(image_path, boxes, filtered_masks)
+        return player_positions
 
     def process_player_masks(self, image_path, boxes, filtered_masks):
         original_img = cv2.imread(image_path)
