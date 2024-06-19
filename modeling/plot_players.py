@@ -24,7 +24,7 @@ def is_in_court(img_str, player_positions):
             xi, yi = points[i]
             xj, yj = points[j]
 
-            intersect = ((yi > y) != (yj > y)) and (
+            intersect = ((yi + 5 > y) != (yj + 5 > y)) and (
                 x < (xj - xi) * (y - yi) / (yj - yi) + xi
             )
             if intersect:
