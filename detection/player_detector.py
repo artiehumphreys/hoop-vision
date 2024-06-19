@@ -97,6 +97,10 @@ class PlayerDetector:
         filtered_masks = masks[filtered_boxes]
         boxes = boxes[filtered_boxes]
 
+        player_positions = [
+            (boxes[i, 2].item(), boxes[i, 3].item()) for i in range(len(boxes))
+        ]
+
         return player_positions
 
     def process_player_masks(self, image_path, boxes, filtered_masks):
