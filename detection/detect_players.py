@@ -1,5 +1,6 @@
 import cv2
 from detection import detect_jersey, detect_with_roboflow
+from pre_processing import load_image
 import torch
 import torchvision
 from torchvision import transforms as T
@@ -44,7 +45,7 @@ def is_in_court(img_str, player_positions):
 
 def detect_players_with_roboflow(image_path: str):
     try:
-        image, img_str = detect_with_roboflow.load_and_encode_image(image_path)
+        image, img_str = load_image.load_and_encode_image(image_path)
     except ValueError as e:
         print(e)
         return
@@ -84,7 +85,7 @@ def detect_players_with_mask_crnn(image_path: str):
         (boxes[i, 2].item(), boxes[i, 3].item()) for i in range(len(boxes))
     ]
 
-    _, img_str = detect_with_roboflow.load_and_encode_image(image_path=image_path)
+    _, img_str = load_image.load_and_encode_image(image_path=image_path)
     in_court = is_in_court(img_str, player_positions)
 
     filtered_boxes = [
@@ -98,6 +99,10 @@ def detect_players_with_mask_crnn(image_path: str):
 
     boxes = boxes[filtered_boxes]
 
+    process_player_masks(image_path, boxes, filtered_masks)
+
+
+def process_player_masks(image_path, boxes, filtered_masks):
     original_img = cv2.imread(image_path)
     original_img_hsv = cv2.cvtColor(original_img, cv2.COLOR_BGR2HSV)
     final_img = original_img.copy()
