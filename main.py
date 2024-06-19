@@ -6,7 +6,7 @@ from icecream import ic
 
 
 def main():
-    court_corners = [(190, 192.5), (310, 2.5), (310, 2.5), (190, 2.5)]
+    court_corners = [(190, 192.5), (310, 2.5), (190, 2.5), (310, 192.5)]
     img_path = "data/frame10.jpg"
     # pp.extract_frames(5)
     img = image_loader.ImageLoader(img_path)
