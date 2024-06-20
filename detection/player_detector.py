@@ -33,7 +33,7 @@ class PlayerDetector:
                 xi, yi = points[i]
                 xj, yj = points[j]
 
-                intersect = ((yi + 5 > y) != (yj + 5 > y)) and (
+                intersect = ((yi + 10 > y) != (yj + 10 > y)) and (
                     x < (xj - xi) * (y - yi) / (yj - yi) + xi
                 )
                 if intersect:
@@ -97,18 +97,13 @@ class PlayerDetector:
         filtered_masks = masks[filtered_boxes]
         boxes = boxes[filtered_boxes]
 
-        player_positions = [
-            (boxes[i, 2].item(), boxes[i, 3].item()) for i in range(len(boxes))
-        ]
-
-        self.process_player_masks(image_path, boxes, filtered_masks)
-
-        return player_positions
+        return self.process_player_masks(image_path, boxes, filtered_masks)
 
     def process_player_masks(self, image_path, boxes, filtered_masks):
         original_img = cv2.imread(image_path)
         original_img_hsv = cv2.cvtColor(original_img, cv2.COLOR_BGR2HSV)
         final_img = original_img.copy()
+        player_positions = []
 
         for i in range(filtered_masks.shape[0]):
             mask = filtered_masks[i, 0] > 0.5
@@ -120,17 +115,19 @@ class PlayerDetector:
             colored_mask = np.zeros_like(original_img)
             colored_mask[:, :, 0] = play_mask
             final_img = cv2.addWeighted(final_img, 1, colored_mask, 0.5, 0)
+            team = self.jersey_detector.get_teams_from_jersey(player_img)
+            player_positions.append(((boxes[i, 2].item(), boxes[i, 3].item()), team))
             cv2.putText(
                 final_img,
-                self.jersey_detector.get_teams_from_jersey(player_img),
+                team,
                 (int(boxes[i, 0].item()), int(boxes[i, 1].item())),
                 cv2.FONT_HERSHEY_COMPLEX,
                 0.9,
                 (0, 0, 255),
                 2,
             )
-
         self.display_image(final_img)
+        return player_positions
 
     def display_image(self, image):
         cv2.imshow("Original Image with Detected Players", image)

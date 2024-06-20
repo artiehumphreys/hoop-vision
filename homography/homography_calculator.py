@@ -12,17 +12,22 @@ class HomographyCalculator:
         src_points = np.array(src_points, dtype=np.float32)
         dst_points = np.array(dst_points, dtype=np.float32)
         H, _ = cv2.findHomography(src_points, dst_points, cv2.RANSAC)
+        # im_in = cv2.imread("data/frame55.jpg")
+        # img_out = cv2.warpPerspective(im_in, H, (1280, 720))
+        # cv2.imshow("Original Image with Detected Players", img_out)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         return H
 
     def apply_homography(self, H, points):
         points = np.array(points, dtype=np.float32)
-        points = np.array([points])
+        points = points.reshape(-1, 1, 2)
+
         transformed_points = cv2.perspectiveTransform(points, H)
-        for coord in transformed_points[0]:
-            coord[0] += 300
-            coord[1] -= 100
+
+        transformed_points = transformed_points.reshape(-1, 2)
         ic(transformed_points)
-        return transformed_points[0]
+        return transformed_points
 
     def fetch_points_for_homography(self, img_str):
         project_id = "basketball_court_segmentation"
@@ -31,13 +36,11 @@ class HomographyCalculator:
         predictions = self.roboflow_detector.make_request(img_str, project_id, model_id)
         for prediction in predictions["predictions"]:
             points = [(point["x"], point["y"]) for point in prediction["points"]]
-            if prediction["class"] == "three_second_area":
+            if prediction["class"] == "court":
                 lowest_paint = max(points, key=lambda p: p[1])
                 highest_paint = min(points, key=lambda p: p[1])
                 right_most_paint = max(points, key=lambda p: p[0])
                 left_most_paint = min(points, key=lambda p: p[0])
-            elif prediction["class"] == "two_point_area":
-                right_most_three = right_most_paint = max(points, key=lambda p: p[0])
         return [
             lowest_paint,
             highest_paint,
