@@ -14,10 +14,14 @@ class CourtDrawer:
         self.homography_calculator = HomographyCalculator()
         self.right_bounds = np.array(
             [
-                [398, 42],  # LEFT BOTTOM
-                [752, 420],  # TOP RIGHT  (4 o'clock)
-                [752, 42],  # TOP LEFT (7 o'clock)
-                [398, 420],  # RIGHT BOTTOM
+                # [398, 42],  # LEFT BOTTOM
+                # [752, 420],  # TOP RIGHT  (4 o'clock)
+                # [752, 42],  # TOP LEFT (7 o'clock)
+                # [398, 420],  # RIGHT BOTTOM
+                [40, 42],  # LEFT BOTTOM
+                [398, 420],  # TOP RIGHT  (4 o'clock)
+                [398, 42],  # TOP LEFT (7 o'clock)
+                [40, 420],  # RIGHT BOTTOM
             ]
         )
 
@@ -142,5 +146,5 @@ class CourtDrawer:
             ax.plot(pos[0], pos[1], "o", markersize=10, color="blue")
             ax.text(pos[0], pos[1] + 2, team, color="blue")
 
-        # ax.imshow(img)
+        ax.imshow(img)
         plt.show()

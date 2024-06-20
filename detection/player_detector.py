@@ -126,6 +126,15 @@ class PlayerDetector:
                 (0, 0, 255),
                 2,
             )
+            cv2.putText(
+                final_img,
+                "o",
+                (int(boxes[i, 2].item()), int(boxes[i, 3].item())),
+                cv2.FONT_HERSHEY_COMPLEX,
+                0.9,
+                (0, 0, 255),
+                2,
+            )
         self.display_image(final_img)
         return player_positions
 
