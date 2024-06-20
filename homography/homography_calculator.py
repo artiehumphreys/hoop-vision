@@ -19,6 +19,16 @@ class HomographyCalculator:
         # cv2.destroyAllWindows()
         return H
 
+    def calculate_vectors(self, src_points):
+        left_corner = [398, 42]
+        dst_points = [
+            (src_point[0][0] - left_corner[0], src_point[0][1] - left_corner[1])
+            for src_point in src_points
+        ]
+        dst_points = np.array(dst_points, dtype=np.float32)
+
+        return dst_points
+
     def apply_homography(self, H, points, debug=True):
         points = np.array(points, dtype=np.float32)
         points = points.reshape(-1, 1, 2)

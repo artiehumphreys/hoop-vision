@@ -21,6 +21,7 @@ def main():
     drawer.plot_transformed_positions(
         player_positions, camera_view_corners, court_corners, True
     )
+    ic(calc.calculate_vectors(player_positions))
 
 
 if __name__ == "__main__":

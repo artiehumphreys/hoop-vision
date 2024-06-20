@@ -14,14 +14,14 @@ class CourtDrawer:
         self.homography_calculator = HomographyCalculator()
         self.right_bounds = np.array(
             [
-                # [398, 42],  # LEFT BOTTOM
-                # [752, 420],  # TOP RIGHT  (4 o'clock)
-                # [752, 42],  # TOP LEFT (7 o'clock)
-                # [398, 420],  # RIGHT BOTTOM
-                [40, 42],  # LEFT BOTTOM
-                [398, 420],  # TOP RIGHT  (4 o'clock)
-                [398, 42],  # TOP LEFT (7 o'clock)
-                [40, 420],  # RIGHT BOTTOM
+                [398, 42],  # LEFT BOTTOM
+                [752, 420],  # TOP RIGHT  (4 o'clock)
+                [752, 42],  # TOP LEFT (7 o'clock)
+                [398, 420],  # RIGHT BOTTOM
+                # [40, 42],  # LEFT BOTTOM
+                # [398, 420],  # TOP RIGHT  (4 o'clock)
+                # [398, 42],  # TOP LEFT (7 o'clock)
+                # [40, 420],  # RIGHT BOTTOM
             ]
         )
 
