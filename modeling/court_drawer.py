@@ -116,7 +116,7 @@ class CourtDrawer:
         self, player_positions, court_corners, camera_corners
     ):
         ax = self.draw_basketball_court()
-        H = self.homography_calculator.calculate_homography(
+        H = self.homography_calculator.calculate_homography_from_points(
             camera_corners, court_corners
         )
         transformed_positions = self.homography_calculator.apply_homography(
