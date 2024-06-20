@@ -8,7 +8,6 @@ import numpy as np
 
 def main():
     img_path = "data/frame55.jpg"
-    # pp.extract_frames(5)
     img = ImageLoader(img_path)
     detector = PlayerDetector(img)
     drawer = CourtDrawer()
@@ -24,5 +23,20 @@ def main():
     ic(calc.calculate_vectors(player_positions))
 
 
+def vectors():
+    img_path = "data/frame55.jpg"
+    img = ImageLoader(img_path)
+    detector = PlayerDetector(img)
+    drawer = CourtDrawer()
+    calc = HomographyCalculator()
+    _, encoded_img = img.load_and_encode_image()
+    player_positions = detector.detect_players_with_mask_rcnn(image_path=img_path)
+    camera_view_corners = calc.fetch_points_for_homography(encoded_img)
+    left_corner = camera_view_corners[0]
+    vectors = calc.calculate_vectors(player_positions, left_corner)
+    ic(vectors)
+    drawer.plot_vectors(vectors)
+
+
 if __name__ == "__main__":
-    main()
+    vectors()

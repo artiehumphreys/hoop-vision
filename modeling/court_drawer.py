@@ -149,3 +149,19 @@ class CourtDrawer:
         if not debug:
             ax.imshow(img)
         plt.show()
+
+    def plot_vectors(self, vectors):
+        img = plt.imread(self.path)
+        _, ax = plt.subplots()
+        left_corner = [398, 42]
+        for vector in vectors:
+            ax.plot(
+                left_corner[0]
+                + vector[0] * 425 / 1280,  # scaling by size difference in paint
+                left_corner[1] - vector[1] * 650 / 720,
+                "o",
+                markersize=10,
+                color="blue",
+            )
+        ax.imshow(img)
+        plt.show()
