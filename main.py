@@ -19,7 +19,7 @@ def main():
     camera_view_corners = calc.fetch_points_for_homography(encoded_img)
     ic(camera_view_corners, court_corners, player_positions)
     drawer.plot_transformed_positions(
-        player_positions, camera_view_corners, court_corners
+        player_positions, camera_view_corners, court_corners, True
     )
 
 

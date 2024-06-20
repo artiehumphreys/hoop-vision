@@ -19,19 +19,20 @@ class HomographyCalculator:
         # cv2.destroyAllWindows()
         return H
 
-    def apply_homography(self, H, points):
+    def apply_homography(self, H, points, debug=True):
         points = np.array(points, dtype=np.float32)
         points = points.reshape(-1, 1, 2)
 
         transformed_points = cv2.perspectiveTransform(points, H)
 
         transformed_points = transformed_points.reshape(-1, 2)
-        mid = 467 / 2
-        for point in transformed_points:
-            point[0] *= 0.2
-            point[0] += 400
-            point[1] = point[1] - 3 * (point[1] - mid)
-            point[1] -= 50
+        if not debug:
+            mid = 467 / 2
+            for point in transformed_points:
+                point[0] *= 0.2
+                point[0] += 400
+                point[1] = point[1] - 3 * (point[1] - mid)
+                point[1] -= 50
         ic(transformed_points)
         return transformed_points
 
@@ -52,5 +53,4 @@ class HomographyCalculator:
             highest_paint,
             right_most_paint,
             left_most_paint,
-            # right_most_three,
         ]

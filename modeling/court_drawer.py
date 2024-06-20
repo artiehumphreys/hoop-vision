@@ -129,7 +129,7 @@ class CourtDrawer:
         return ax
 
     def plot_transformed_positions(
-        self, player_positions, court_corners, camera_corners
+        self, player_positions, court_corners, camera_corners, debug=True
     ):
         coordinates = [pos for pos, _ in player_positions]
         teams = [team for _, team in player_positions]
@@ -138,13 +138,14 @@ class CourtDrawer:
             camera_corners, court_corners
         )
         transformed_positions = self.homography_calculator.apply_homography(
-            H, coordinates
+            H, coordinates, debug
         )
         img = plt.imread(self.path)
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         for pos, team in zip(transformed_positions, teams):
             ax.plot(pos[0], pos[1], "o", markersize=10, color="blue")
             ax.text(pos[0], pos[1] + 2, team, color="blue")
 
-        ax.imshow(img)
+        if not debug:
+            ax.imshow(img)
         plt.show()
