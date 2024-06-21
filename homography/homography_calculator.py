@@ -12,11 +12,11 @@ class HomographyCalculator:
         src_points = np.array(src_points, dtype=np.float32)
         dst_points = np.array(dst_points, dtype=np.float32)
         H, _ = cv2.findHomography(dst_points, src_points)
-        im_in = cv2.imread("data/frame55.jpg")
-        img_out = cv2.warpPerspective(im_in, H, (3000, 2500))
-        cv2.imshow("Original Image with Detected Players", img_out)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # im_in = cv2.imread("data/frame55.jpg")
+        # img_out = cv2.warpPerspective(im_in, H, (3000, 2500))
+        # cv2.imshow("Original Image with Detected Players", img_out)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         return H
 
     def calculate_vectors(self, src_points, left_corner):

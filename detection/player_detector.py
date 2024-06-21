@@ -135,7 +135,7 @@ class PlayerDetector:
                 (0, 0, 255),
                 2,
             )
-        self.display_image(final_img)
+        # self.display_image(final_img)
         return player_positions
 
     def display_image(self, image):
