@@ -3,7 +3,6 @@ from matplotlib.patches import Circle, Rectangle, Arc
 from homography.homography_calculator import HomographyCalculator
 from pre_processing.image_loader import ImageLoader
 import numpy as np
-from icecream import ic
 
 
 class CourtDrawer:
@@ -158,7 +157,6 @@ class CourtDrawer:
             # scaling by size difference in paint
             x = left_corner[0] + vector[0] * 150 / 566 - 175
             y = left_corner[1] + vector[1] + 175
-            ic(x, y)
             ax.plot(
                 x,
                 y,

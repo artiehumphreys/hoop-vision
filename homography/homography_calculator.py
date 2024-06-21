@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from detection import roboflow_detector
-from icecream import ic
 
 
 class HomographyCalculator:
@@ -36,10 +35,8 @@ class HomographyCalculator:
 
         transformed_points = transformed_points.reshape(-1, 2)
         mid_y = 440 / 2
-        ic(transformed_points)
         for coord in transformed_points:
             coord[1] = 2 * mid_y - coord[1]
-        ic(transformed_points)
         return transformed_points
 
     def fetch_points_for_homography(self, img_str):

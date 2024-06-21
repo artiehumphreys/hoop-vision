@@ -5,7 +5,6 @@ import numpy as np
 from PIL import Image
 from torchvision import transforms as T
 from detection import jersey_detector, roboflow_detector
-from pre_processing import image_loader
 
 
 class PlayerDetector:
