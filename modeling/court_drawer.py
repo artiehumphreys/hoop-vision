@@ -147,8 +147,7 @@ class CourtDrawer:
             ax.plot(pos[0], pos[1], "o", markersize=10, color="blue")
             ax.text(pos[0], pos[1] + 2, team, color="blue")
 
-        if not debug:
-            ax.imshow(img)
+        ax.imshow(img)
         plt.show()
 
     def plot_vectors(self, vectors):
