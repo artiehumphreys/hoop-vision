@@ -32,9 +32,9 @@ def vectors():
     _, encoded_img = img.load_and_encode_image()
     player_positions = detector.detect_players_with_mask_rcnn(image_path=img_path)
     camera_view_corners = calc.fetch_points_for_homography(encoded_img)
+    ic(camera_view_corners)
     left_corner = camera_view_corners[0]
     vectors = calc.calculate_vectors(player_positions, left_corner)
-    ic(vectors)
     drawer.plot_vectors(vectors)
 
 

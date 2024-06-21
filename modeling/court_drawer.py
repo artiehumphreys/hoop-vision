@@ -3,6 +3,7 @@ from matplotlib.patches import Circle, Rectangle, Arc
 from homography.homography_calculator import HomographyCalculator
 from pre_processing.image_loader import ImageLoader
 import numpy as np
+from icecream import ic
 
 
 class CourtDrawer:
@@ -153,12 +154,15 @@ class CourtDrawer:
     def plot_vectors(self, vectors):
         img = plt.imread(self.path)
         _, ax = plt.subplots()
-        left_corner = [398, 42]
+        left_corner = [612.5, 280]
         for vector in vectors:
+            # scaling by size difference in paint
+            x = left_corner[0] + vector[0] * 150 / 566 - 175
+            y = left_corner[1] + vector[1] + 175
+            ic(x, y)
             ax.plot(
-                left_corner[0]
-                + vector[0] * 425 / 1280,  # scaling by size difference in paint
-                left_corner[1] - vector[1] * 650 / 720,
+                x,
+                y,
                 "o",
                 markersize=10,
                 color="blue",
