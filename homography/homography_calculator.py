@@ -28,7 +28,7 @@ class HomographyCalculator:
 
         return dst_points
 
-    def apply_homography(self, H, points, debug=True):
+    def apply_homography(self, H, points):
         points = np.array(points, dtype=np.float32)
         points = points.reshape(-1, 1, 2)
 
