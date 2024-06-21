@@ -1,6 +1,7 @@
 # Data folders (for now)
 data/
 samples/
+results/
 
 # Mac-specific files
 .DS_Store
