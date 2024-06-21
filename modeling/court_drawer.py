@@ -1,13 +1,29 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Rectangle, Arc
 from homography.homography_calculator import HomographyCalculator
+from pre_processing.image_loader import ImageLoader
+import numpy as np
 
 
 class CourtDrawer:
     def __init__(self, color="black", lw=2):
         self.color = color
         self.lw = lw
+        self.path = "/Users/artiehumphreys/Desktop/Object Detection/full-court.jpeg"
+        self.img = ImageLoader(self.path).load_image()
         self.homography_calculator = HomographyCalculator()
+        self.right_bounds = np.array(
+            [
+                [398, 42],  # LEFT BOTTOM
+                [752, 420],  # TOP RIGHT  (4 o'clock)
+                [752, 42],  # TOP LEFT (7 o'clock)
+                [398, 420],  # RIGHT BOTTOM
+                # [40, 42],  # LEFT BOTTOM
+                # [398, 420],  # TOP RIGHT  (4 o'clock)
+                # [398, 42],  # TOP LEFT (7 o'clock)
+                # [40, 420],  # RIGHT BOTTOM
+            ]
+        )
 
     def draw_basketball_court(self):
         fig, ax = plt.subplots(figsize=(12.8, 7.2))
@@ -115,14 +131,38 @@ class CourtDrawer:
     def plot_transformed_positions(
         self, player_positions, court_corners, camera_corners
     ):
-        ax = self.draw_basketball_court()
-        H = self.homography_calculator.calculate_homography(
+        coordinates = [pos for pos, _ in player_positions]
+        teams = [team for _, team in player_positions]
+
+        H = self.homography_calculator.calculate_homography_from_points(
             camera_corners, court_corners
         )
         transformed_positions = self.homography_calculator.apply_homography(
-            H, player_positions
+            H, coordinates
         )
-        for pos in transformed_positions:
-            plt.plot(pos[0], pos[1], "o", markersize=10, color="blue")
+        img = plt.imread(self.path)
+        _, ax = plt.subplots()
+        for pos, team in zip(transformed_positions, teams):
+            ax.plot(pos[0], pos[1], "o", markersize=10, color="blue")
+            ax.text(pos[0], pos[1] + 2, team, color="blue")
 
+        ax.imshow(img)
+        plt.show()
+
+    def plot_vectors(self, vectors):
+        img = plt.imread(self.path)
+        _, ax = plt.subplots()
+        left_corner = [612.5, 280]
+        for vector in vectors:
+            # scaling by size difference in paint
+            x = left_corner[0] + vector[0] * 150 / 566 - 175
+            y = left_corner[1] + vector[1] + 175
+            ax.plot(
+                x,
+                y,
+                "o",
+                markersize=10,
+                color="blue",
+            )
+        ax.imshow(img)
         plt.show()
