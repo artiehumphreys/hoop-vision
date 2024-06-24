@@ -34,7 +34,7 @@ class HomographyCalculator:
         transformed_points = cv2.perspectiveTransform(points, H)
 
         transformed_points = transformed_points.reshape(-1, 2)
-        mid_y = 430 / 2
+        # court doesn't start until y = 40
         for coord in transformed_points:
-            coord[1] = 2 * mid_y - coord[1] * 0.95
+            coord[1] = coord[1] + 40
         return transformed_points

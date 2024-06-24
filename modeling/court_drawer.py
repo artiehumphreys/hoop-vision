@@ -147,6 +147,7 @@ class CourtDrawer:
             ax.text(pos[0], pos[1] + 2, team, color="blue")
 
         ax.imshow(img)
+        ax.invert_yaxis()
         plt.show()
 
     def plot_vectors(self, vectors):
