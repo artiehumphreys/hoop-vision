@@ -16,6 +16,7 @@ def main():
     directory = "data"
     files = os.listdir(directory)
     sorted_files = sorted(files, key=extract_number)
+    drawer = CourtDrawer()
     for filename in sorted_files:
         if not filename.endswith("jpg"):
             continue
@@ -24,9 +25,9 @@ def main():
         img = ImageLoader(img_path)
         image = img.load_image()
         hull, camera_view_corners = detect_court_boundary(image)
+        print(camera_view_corners)
         detector = PlayerDetector(img, hull)
         player_positions = detector.detect_players_with_mask_rcnn(image_path=img_path)
-        drawer = CourtDrawer()
         court_corners = drawer.right_bounds
         drawer.plot_transformed_positions(
             player_positions, camera_view_corners, court_corners

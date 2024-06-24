@@ -36,12 +36,12 @@ def extract_court_pixels_ycrcb(image):
     cr_bin_center = (cr_bins[dominant_bin[0]] + cr_bins[dominant_bin[0] + 1]) / 2
     cb_bin_center = (cb_bins[dominant_bin[1]] + cb_bins[dominant_bin[1] + 1]) / 2
 
-    threshold = 12  # adjustable
+    threshold = 14  # adjustable
     court_mask = np.zeros((height, width), dtype=np.uint8)
     for i in range(height):
         for j in range(width):
             if (
-                abs(cr_channel[i, j] - cr_bin_center) < threshold
+                abs(cr_channel[i, j] - cr_bin_center) < threshold + 3
                 and abs(cb_channel[i, j] - cb_bin_center) < threshold
             ):
                 court_mask[i, j] = 255
@@ -67,6 +67,11 @@ def detect_court_boundary(image):
     highest_court = min(vertices, key=lambda x: x[0][1])
     right_most_court = max(vertices, key=lambda x: x[0][0])
     left_most_court = min(vertices, key=lambda x: (x[0][0], x[0][1]))
+
+    cv2.drawContours(image, [vertices], -1, (0, 255, 0), 2)
+    cv2.imshow("hull", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     return vertices, [
         lowest_court,
