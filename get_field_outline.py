@@ -46,9 +46,6 @@ def extract_court_pixels_ycrcb(image):
             ):
                 court_mask[i, j] = 255
 
-    kernel = np.ones((5, 5), np.uint8)
-    court_mask = cv2.morphologyEx(court_mask, cv2.MORPH_CLOSE, kernel)
-    court_mask = cv2.morphologyEx(court_mask, cv2.MORPH_OPEN, kernel)
     return court_mask
 
 
