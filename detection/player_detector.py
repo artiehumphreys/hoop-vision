@@ -18,7 +18,14 @@ class PlayerDetector:
 
     def is_in_court(self, player_positions):
         court_polygon = Polygon(
-            [(point[0][0], point[0][1] + 20) for point in self.court_bounds]
+            [
+                (
+                    (point[0][0], point[0][1] + 20)
+                    if point[0][1] < 360
+                    else (point[0][0], point[0][1] - 10)
+                )
+                for point in self.court_bounds
+            ]
         )
 
         in_court = []
