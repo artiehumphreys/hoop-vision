@@ -43,3 +43,22 @@ class RoboflowDetector:
                     player_positions.append((x, y, width, height))
 
         return ball_y, rim_y, player_positions
+
+    def fetch_points_for_homography(self, img_str):
+        project_id = "basketball_court_segmentation"
+        model_id = 2
+        lowest_court = highest_court = right_most_court = left_most_court = None
+        predictions = self.roboflow_detector.make_request(img_str, project_id, model_id)
+        for prediction in predictions["predictions"]:
+            points = [(point["x"], point["y"]) for point in prediction["points"]]
+            if prediction["class"] == "court":
+                lowest_court = max(points, key=lambda p: p[1])
+                highest_court = min(points, key=lambda p: p[1])
+                right_most_court = max(points, key=lambda p: p[0])
+                left_most_court = min(points, key=lambda p: p[0])
+        return [
+            lowest_court,
+            highest_court,
+            right_most_court,
+            left_most_court,
+        ]

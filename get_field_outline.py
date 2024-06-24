@@ -53,7 +53,7 @@ def extract_court_pixels_ycrcb(image):
 
 
 # https://people.cs.nycu.edu.tw/~yushuen/data/BasketballVideo15.pdf
-def detect_court_boundary_and_paint(image):
+def detect_court_boundary(image):
     court_mask = extract_court_pixels_ycrcb(image)
 
     contours, _ = cv2.findContours(
@@ -61,21 +61,19 @@ def detect_court_boundary_and_paint(image):
     )
 
     largest_contour = max(contours, key=cv2.contourArea)
-    hull = cv2.convexHull(largest_contour)
+    vertices = cv2.convexHull(largest_contour)
 
-    hull_mask = np.zeros_like(court_mask)
-    cv2.drawContours(hull_mask, [hull], -1, 255, thickness=cv2.FILLED)
+    lowest_court = max(vertices, key=lambda x: x[0][1])
+    highest_court = min(vertices, key=lambda x: x[0][1])
+    right_most_court = max(vertices, key=lambda x: x[0][0])
+    left_most_court = min(vertices, key=lambda x: x[0][0])
 
-    image_with_boundaries = image.copy()
-    cv2.drawContours(image_with_boundaries, [hull], -1, (0, 255, 0), 2)
-
-    cv2.imshow("Original Image", image)
-    cv2.imshow("Court Mask", court_mask)
-    cv2.imshow("Court Boundary and Paint Area", image_with_boundaries)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-    return image_with_boundaries
+    return [
+        lowest_court,
+        highest_court,
+        right_most_court,
+        left_most_court,
+    ]
 
 
 def get_field_outline(path: str):
@@ -84,7 +82,7 @@ def get_field_outline(path: str):
         print("Couldn't load image")
         return
 
-    return detect_court_boundary_and_paint(image)
+    return detect_court_boundary(image)
 
 
 get_field_outline("data/frame50.jpg")
