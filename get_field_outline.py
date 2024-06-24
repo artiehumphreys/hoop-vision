@@ -36,7 +36,7 @@ def extract_court_pixels_ycrcb(image):
     cr_bin_center = (cr_bins[dominant_bin[0]] + cr_bins[dominant_bin[0] + 1]) / 2
     cb_bin_center = (cb_bins[dominant_bin[1]] + cb_bins[dominant_bin[1] + 1]) / 2
 
-    threshold = 10  # adjustable
+    threshold = 12  # adjustable
     court_mask = np.zeros((height, width), dtype=np.uint8)
     for i in range(height):
         for j in range(width):
@@ -74,15 +74,3 @@ def detect_court_boundary(image):
         right_most_court,
         left_most_court,
     ]
-
-
-def get_field_outline(path: str):
-    image = cv2.imread(path)
-    if image is None:
-        print("Couldn't load image")
-        return
-
-    return detect_court_boundary(image)
-
-
-get_field_outline("data/frame50.jpg")

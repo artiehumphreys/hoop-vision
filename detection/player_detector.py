@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image
 from torchvision import transforms as T
 from detection import jersey_detector, roboflow_detector
+from shapely.geometry import Point, Polygon
 
 
 class PlayerDetector:
@@ -16,26 +17,14 @@ class PlayerDetector:
         self.court_bounds = court_bounds
 
     def is_in_court(self, player_positions):
-        j = len(self.court_bounds) - 1
+        court_polygon = Polygon(
+            [(point[0][0], point[0][1]) for point in self.court_bounds]
+        )
+
         in_court = []
-
         for player_position in player_positions:
-            inside = False
-            x, y = player_position[0], player_position[1]
-
-            for i in range(len(self.court_bounds)):
-                xi, yi = self.court_bounds[i][0]
-                xj, yj = self.court_bounds[j][0]
-
-                intersect = ((yi > y) != (yj > y)) and (
-                    x < (xj - xi) * (y - yi) / (yj - yi) + xi
-                )
-                print((x, y))
-                if intersect:
-                    inside = not inside
-                j = i
-
-            in_court.append(inside)
+            player_point = Point(player_position)
+            in_court.append(court_polygon.contains(player_point))
 
         return in_court
 

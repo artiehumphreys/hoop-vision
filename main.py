@@ -25,9 +25,9 @@ def main():
         image = img.load_image()
         hull, camera_view_corners = detect_court_boundary(image)
         detector = PlayerDetector(img, hull)
+        player_positions = detector.detect_players_with_mask_rcnn(image_path=img_path)
         drawer = CourtDrawer()
         court_corners = drawer.right_bounds
-        player_positions = detector.detect_players_with_mask_rcnn(image_path=img_path)
         drawer.plot_transformed_positions(
             player_positions, camera_view_corners, court_corners
         )
