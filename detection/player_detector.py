@@ -8,33 +8,29 @@ from detection import jersey_detector, roboflow_detector
 
 
 class PlayerDetector:
-    def __init__(self, image_loader):
+
+    def __init__(self, image_loader, court_bounds):
         self.roboflow_detector = roboflow_detector.RoboflowDetector()
         self.jersey_detector = jersey_detector.JerseyDetector()
         self.image_loader = image_loader
+        self.court_bounds = court_bounds
 
-    def is_in_court(self, img_str, player_positions):
-        project_id = "basketball_court_segmentation"
-        model_id = 2
-        predictions = self.roboflow_detector.make_request(img_str, project_id, model_id)
-        points = []
-        for prediction in predictions["predictions"]:
-            points += [(point["x"], point["y"]) for point in prediction["points"]]
-
-        num = len(points)
-        j = num - 1
+    def is_in_court(self, player_positions):
+        j = len(self.court_bounds) - 1
         in_court = []
+
         for player_position in player_positions:
             inside = False
             x, y = player_position[0], player_position[1]
 
-            for i in range(num):
-                xi, yi = points[i]
-                xj, yj = points[j]
+            for i in range(len(self.court_bounds)):
+                xi, yi = self.court_bounds[i][0]
+                xj, yj = self.court_bounds[j][0]
 
-                intersect = ((yi + 10 > y) != (yj + 10 > y)) and (
+                intersect = ((yi > y) != (yj > y)) and (
                     x < (xj - xi) * (y - yi) / (yj - yi) + xi
                 )
+                print((x, y))
                 if intersect:
                     inside = not inside
                 j = i
@@ -84,8 +80,7 @@ class PlayerDetector:
             (boxes[i, 2].item(), boxes[i, 3].item()) for i in range(len(boxes))
         ]
 
-        _, img_str = self.image_loader.load_and_encode_image()
-        in_court = self.is_in_court(img_str, player_positions)
+        in_court = self.is_in_court(player_positions)
 
         filtered_boxes = [
             i
@@ -93,6 +88,7 @@ class PlayerDetector:
             if in_court[i]
             and (boxes[i, 3] - boxes[i, 1]) >= 1.2 * (boxes[i, 2] - boxes[i, 0])
         ]
+        print(in_court)
         filtered_masks = masks[filtered_boxes]
         boxes = boxes[filtered_boxes]
 

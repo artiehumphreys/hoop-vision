@@ -22,12 +22,12 @@ def main():
         img_path = os.path.join("data", filename)
         print(img_path)
         img = ImageLoader(img_path)
-        detector = PlayerDetector(img)
+        image = img.load_image()
+        hull, camera_view_corners = detect_court_boundary(image)
+        detector = PlayerDetector(img, hull)
         drawer = CourtDrawer()
         court_corners = drawer.right_bounds
-        image = img.load_image()
         player_positions = detector.detect_players_with_mask_rcnn(image_path=img_path)
-        camera_view_corners = detect_court_boundary(image)
         drawer.plot_transformed_positions(
             player_positions, camera_view_corners, court_corners
         )

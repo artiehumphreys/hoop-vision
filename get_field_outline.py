@@ -66,9 +66,9 @@ def detect_court_boundary(image):
     lowest_court = max(vertices, key=lambda x: x[0][1])
     highest_court = min(vertices, key=lambda x: x[0][1])
     right_most_court = max(vertices, key=lambda x: x[0][0])
-    left_most_court = min(vertices, key=lambda x: x[0][0])
+    left_most_court = min(vertices, key=lambda x: (x[0][0], x[0][1]))
 
-    return [
+    return vertices, [
         lowest_court,
         highest_court,
         right_most_court,

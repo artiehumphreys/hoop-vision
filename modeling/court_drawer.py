@@ -155,8 +155,8 @@ class CourtDrawer:
         left_corner = [612.5, 280]
         for vector in vectors:
             # scaling by size difference in paint
-            x = left_corner[0] + vector[0] * 150 / 566 - 175
-            y = left_corner[1] + vector[1] + 175
+            x = left_corner[0] + vector[0]
+            y = left_corner[1] + vector[1]
             ax.plot(
                 x,
                 y,
