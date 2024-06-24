@@ -62,3 +62,21 @@ class RoboflowDetector:
             right_most_court,
             left_most_court,
         ]
+
+    def detect_players_with_roboflow(self):
+        try:
+            image, img_str = self.image_loader.load_and_encode_image()
+        except ValueError as e:
+            print(e)
+            return
+
+        project_id = "basketball-w2xcw"
+        model_id = 1
+
+        predictions = self.roboflow_detector.make_request(img_str, project_id, model_id)
+        _, _, player_positions = self.roboflow_detector.process_predictions(predictions)
+        in_court = self.is_in_court(img_str, player_positions)
+        self.draw_players(image, player_positions, in_court)
+        self.display_image(image)
+
+        return img_str, player_positions
