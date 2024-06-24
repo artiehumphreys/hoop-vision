@@ -3,37 +3,53 @@ import numpy as np
 import cv2
 
 
-def segment_hardwood(image):
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+# https://people.cs.nycu.edu.tw/~yushuen/data/BasketballVideo15.pdf
+def extract_court_pixels_ycrcb(image):
+    ycrcb_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
 
-    lower_wood = np.array([10, 40, 50])
-    upper_wood = np.array([30, 255, 255])
+    _, cr_channel, cb_channel = cv2.split(ycrcb_image)
 
-    hardwood_mask = cv2.inRange(hsv_image, lower_wood, upper_wood)
+    hist_size = 16
+    cr_bins = np.linspace(0, 256, hist_size + 1)
+    cb_bins = np.linspace(0, 256, hist_size + 1)
+
+    histogram = np.zeros((hist_size, hist_size))
+
+    height, width = cr_channel.shape
+
+    dmax = height / 2.0
+    weight_matrix = np.zeros((height, width))
+    for i in range(height):
+        di = min(i, height - i)
+        weight_matrix[i, :] = di / dmax
+
+    for i in range(height):
+        for j in range(width):
+            cr_value = cr_channel[i, j]
+            cb_value = cb_channel[i, j]
+            cr_bin = np.digitize(cr_value, cr_bins) - 1
+            cb_bin = np.digitize(cb_value, cb_bins) - 1
+            histogram[cr_bin, cb_bin] += weight_matrix[i, j]
+
+    dominant_bin = np.unravel_index(np.argmax(histogram, axis=None), histogram.shape)
+
+    cr_bin_center = (cr_bins[dominant_bin[0]] + cr_bins[dominant_bin[0] + 1]) / 2
+    cb_bin_center = (cb_bins[dominant_bin[1]] + cb_bins[dominant_bin[1] + 1]) / 2
+
+    threshold = 10  # adjustable
+    court_mask = np.zeros((height, width), dtype=np.uint8)
+    for i in range(height):
+        for j in range(width):
+            if (
+                abs(cr_channel[i, j] - cr_bin_center) < threshold
+                and abs(cb_channel[i, j] - cb_bin_center) < threshold
+            ):
+                court_mask[i, j] = 255
 
     kernel = np.ones((5, 5), np.uint8)
-    hardwood_mask = cv2.morphologyEx(hardwood_mask, cv2.MORPH_CLOSE, kernel)
-    hardwood_mask = cv2.morphologyEx(hardwood_mask, cv2.MORPH_OPEN, kernel)
-
-    contours, _ = cv2.findContours(
-        hardwood_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
-
-    approx_contours = []
-    for contour in contours:
-        epsilon = 0.02 * cv2.arcLength(contour, True)
-        approx_contour = cv2.approxPolyDP(contour, epsilon, True)
-        approx_contours.append(approx_contour)
-
-    # Draw the approximated contours on the original image
-    image_with_contours = image.copy()
-    cv2.drawContours(image_with_contours, approx_contours, -1, (0, 255, 0), 2)
-
-    cv2.imshow("mask", image_with_contours)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-    return hardwood_mask
+    court_mask = cv2.morphologyEx(court_mask, cv2.MORPH_CLOSE, kernel)
+    court_mask = cv2.morphologyEx(court_mask, cv2.MORPH_OPEN, kernel)
+    return court_mask
 
 
 def get_field_outline(path: str):
@@ -42,7 +58,7 @@ def get_field_outline(path: str):
         print("Couldn't load image")
         return
 
-    return segment_hardwood(image)
+    return extract_court_pixels_ycrcb(image)
 
 
 get_field_outline("data/frame50.jpg")
