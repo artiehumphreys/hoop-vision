@@ -1,10 +1,11 @@
-from detection.player_detector import PlayerDetector
-from modeling.court_drawer import CourtDrawer
-from pre_processing.image_loader import ImageLoader
-from homography.homography_calculator import HomographyCalculator
-from get_field_outline import detect_court_boundary
 import os
 import re
+
+from detection.player_detector import PlayerDetector
+from get_field_outline import detect_court_boundary
+from homography.homography_calculator import HomographyCalculator
+from modeling.court_drawer import CourtDrawer
+from pre_processing.image_loader import ImageLoader
 
 
 def extract_number(filename):

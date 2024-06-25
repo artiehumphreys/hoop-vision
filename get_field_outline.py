@@ -48,9 +48,14 @@ def extract_court_pixels_ycrcb(image):
     return court_mask
 
 
+vertex_history = []
+
+
 # https://people.cs.nycu.edu.tw/~yushuen/data/BasketballVideo15.pdf
 def detect_court_boundary(image):
     court_mask = extract_court_pixels_ycrcb(image)
+    max_history_length = 5
+    global vertex_history
 
     contours, _ = cv2.findContours(
         court_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
@@ -65,14 +70,20 @@ def detect_court_boundary(image):
     right_most_court = max(vertices, key=lambda x: x[0])
     left_most_court = min(vertices, key=lambda x: (x[0], x[1]))
 
+    corners = [lowest_court, highest_court, right_most_court, left_most_court]
+
+    vertex_history.append(corners)
+    if len(vertex_history) > max_history_length:
+        vertex_history.pop(0)
+    average_vertex = np.zeros_like(corners, dtype=np.float32)
+    for vertex in vertex_history:
+        average_vertex += vertex
+    average_vertex /= len(vertex_history)
+
+    print(average_vertex)
     cv2.drawContours(image, [vertices], -1, (0, 255, 0), 2)
     cv2.imshow("hull", image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    return vertices, [
-        lowest_court,
-        highest_court,
-        right_most_court,
-        left_most_court,
-    ]
+    return vertices, average_vertex
