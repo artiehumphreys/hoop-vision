@@ -1,6 +1,5 @@
-import os
-import numpy as np
 import cv2
+import numpy as np
 
 
 # https://people.cs.nycu.edu.tw/~yushuen/data/BasketballVideo15.pdf
