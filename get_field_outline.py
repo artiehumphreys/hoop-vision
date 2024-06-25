@@ -58,11 +58,12 @@ def detect_court_boundary(image):
 
     largest_contour = max(contours, key=cv2.contourArea)
     vertices = cv2.convexHull(largest_contour)
+    vertices = np.reshape(vertices, (-1, 2))
 
-    lowest_court = max(vertices, key=lambda x: x[0][1])
-    highest_court = min(vertices, key=lambda x: x[0][1])
-    right_most_court = max(vertices, key=lambda x: x[0][0])
-    left_most_court = min(vertices, key=lambda x: (x[0][0], x[0][1]))
+    lowest_court = max(vertices, key=lambda x: x[1])
+    highest_court = min(vertices, key=lambda x: x[1])
+    right_most_court = max(vertices, key=lambda x: x[0])
+    left_most_court = min(vertices, key=lambda x: (x[0], x[1]))
 
     cv2.drawContours(image, [vertices], -1, (0, 255, 0), 2)
     cv2.imshow("hull", image)

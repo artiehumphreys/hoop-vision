@@ -1,15 +1,15 @@
 import cv2
+import numpy as np
 import torch
 import torchvision
-import numpy as np
 from PIL import Image
-from torchvision import transforms as T
-from detection import jersey_detector, roboflow_detector
 from shapely.geometry import Point, Polygon
+from torchvision import transforms as T
+
+from detection import jersey_detector, roboflow_detector
 
 
 class PlayerDetector:
-
     def __init__(self, image_loader, court_bounds):
         self.roboflow_detector = roboflow_detector.RoboflowDetector()
         self.jersey_detector = jersey_detector.JerseyDetector()
@@ -20,9 +20,9 @@ class PlayerDetector:
         court_polygon = Polygon(
             [
                 (
-                    (point[0][0], point[0][1] + 20)
-                    if point[0][1] < 360
-                    else (point[0][0], point[0][1] - 10)
+                    (point[0], point[1] + 20)
+                    if point[1] < 360
+                    else (point[0], point[1] - 10)
                 )
                 for point in self.court_bounds
             ]
