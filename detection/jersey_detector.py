@@ -18,10 +18,13 @@ class JerseyDetector:
     def find_peak_hues(self):
         peak_hues = []
         for player_img in self.player_imgs:
-            hue_channel = player_img[:, :, 0]
-            non_zero_hue = hue_channel[hue_channel > 0]
-            peak_hue = np.bincount(non_zero_hue).argmax()
-            peak_hues.append(peak_hue)
+            _, cr_channel, cb_channel = cv2.split(player_img)
+            non_zero_cr = cr_channel[cr_channel > 0]
+            peak_cr = np.bincount(non_zero_cr).argmax()
+            non_zero_cb = cr_channel[cb_channel > 0]
+            peak_cb = np.bincount(non_zero_cb).argmax()
+            print(peak_cr, peak_cb)
+            peak_hues.append(peak_cr)
         self.peak_hues = peak_hues
 
     def create_histogram(self):
@@ -38,7 +41,7 @@ class JerseyDetector:
 
         kmeans = KMeans(n_clusters=2).fit(np.array(self.peak_hues).reshape(-1, 1))
         cluster_centers = kmeans.cluster_centers_.flatten()
-        teams_hue_ranges = [(center - 8, center + 8) for center in cluster_centers]
+        teams_hue_ranges = [(center - 10, center + 10) for center in cluster_centers]
 
         return teams_hue_ranges
 
@@ -46,11 +49,12 @@ class JerseyDetector:
         teams_hue_ranges = self.get_teams()
         teams = ["team1", "team2"]
         player_teams = []
+        print(teams_hue_ranges)
         for player_img in self.player_imgs:
-            hue_channel = player_img[:, :, 0]
-            non_zero_hue = hue_channel[hue_channel > 0]
-            dominant_hue = np.median(non_zero_hue) if non_zero_hue.size > 0 else 0
-
+            _, cr_channel, cb_channel = cv2.split(player_img)
+            non_zero_hue = cr_channel[cr_channel > 0]
+            dominant_hue = np.median(non_zero_hue)
+            print(f"dominant: {dominant_hue}")
             team = "Referee"
             for j, (low, high) in enumerate(teams_hue_ranges):
                 if low <= dominant_hue <= high:
