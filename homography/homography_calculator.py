@@ -34,26 +34,7 @@ class HomographyCalculator:
         transformed_points = cv2.perspectiveTransform(points, H)
 
         transformed_points = transformed_points.reshape(-1, 2)
-        mid_y = 440 / 2
+        # court doesn't start until y = 40
         for coord in transformed_points:
-            coord[1] = 2 * mid_y - coord[1]
+            coord[1] = coord[1] + 40
         return transformed_points
-
-    def fetch_points_for_homography(self, img_str):
-        project_id = "basketball_court_segmentation"
-        model_id = 2
-        lowest_paint = highest_paint = right_most_paint = left_most_paint = None
-        predictions = self.roboflow_detector.make_request(img_str, project_id, model_id)
-        for prediction in predictions["predictions"]:
-            points = [(point["x"], point["y"]) for point in prediction["points"]]
-            if prediction["class"] == "court":
-                lowest_paint = max(points, key=lambda p: p[1])
-                highest_paint = min(points, key=lambda p: p[1])
-                right_most_paint = max(points, key=lambda p: p[0])
-                left_most_paint = min(points, key=lambda p: p[0])
-        return [
-            lowest_paint,
-            highest_paint,
-            right_most_paint,
-            left_most_paint,
-        ]
