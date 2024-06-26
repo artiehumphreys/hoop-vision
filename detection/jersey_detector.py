@@ -3,11 +3,34 @@ import numpy as np
 
 
 class JerseyDetector:
-    def __init__(self):
+    def __init__(self, player_imgs):
         self.lower_maroon = np.array([25, 125, 50])
         self.upper_maroon = np.array([200, 255, 255])
         self.lower_white = np.array([80, 50, 150])
         self.upper_white = np.array([200, 150, 255])
+        self.player_imgs = player_imgs
+
+    def create_histogram(self):
+        hist_size = 16
+        h_bins = np.linspace(0, 256, hist_size + 1)
+        histogram = np.zeros_like(h_bins)
+        for player_img in self.player_imgs:
+            player_hsv = cv2.cvtColor(player_img, BGR2HSV)
+            hue_channel, _, _ = cv2.split(player_hsv)
+            width, height = hue_channel.shape
+            for i in range(height):
+                for j in range(width):
+                    h_value = hue_channel[i, j]
+                    h_bin = np.digitize(h_value, h_bins) - 1
+                    histogram[h_bin] += 1
+
+        dominant_bin = np.unravel_index(
+            np.argmax(histogram, axis=None), histogram.shape
+        )
+
+        h_bin_center = (h_bins[dominant_bin[0]] + h_bins[dominant_bin[0] + 1]) / 2
+
+        return h_bin_center
 
     def get_teams_from_jersey(self, player_img):
         player_hsv = cv2.cvtColor(player_img, cv2.COLOR_BGR2HLS)

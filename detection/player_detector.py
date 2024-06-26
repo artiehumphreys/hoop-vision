@@ -11,8 +11,6 @@ from detection import jersey_detector, roboflow_detector
 
 class PlayerDetector:
     def __init__(self, image_loader, court_bounds):
-        self.roboflow_detector = roboflow_detector.RoboflowDetector()
-        self.jersey_detector = jersey_detector.JerseyDetector()
         self.image_loader = image_loader
         self.court_bounds = court_bounds
 
@@ -76,7 +74,7 @@ class PlayerDetector:
         original_img_hsv = cv2.cvtColor(original_img, cv2.COLOR_BGR2HSV)
         final_img = original_img.copy()
         player_positions = []
-
+        player_imgs = []
         for i in range(filtered_masks.shape[0]):
             mask = filtered_masks[i, 0] > 0.5
             play_mask = mask.numpy().astype("uint8") * 255
@@ -84,20 +82,20 @@ class PlayerDetector:
             player_img = cv2.bitwise_and(
                 original_img_hsv, original_img_hsv, mask=play_mask
             )
+            player_imgs.append(player_img)
             colored_mask = np.zeros_like(original_img)
             colored_mask[:, :, 0] = play_mask
             final_img = cv2.addWeighted(final_img, 1, colored_mask, 0.5, 0)
-            team = self.jersey_detector.get_teams_from_jersey(player_img)
             player_positions.append(((boxes[i, 2].item(), boxes[i, 3].item()), team))
-            cv2.putText(
-                final_img,
-                team,
-                (int(boxes[i, 0].item()), int(boxes[i, 1].item())),
-                cv2.FONT_HERSHEY_COMPLEX,
-                0.9,
-                (0, 0, 255),
-                2,
-            )
+            # cv2.putText(
+            # final_img,
+            # team,
+            # (int(boxes[i, 0].item()), int(boxes[i, 1].item())),
+            # cv2.FONT_HERSHEY_COMPLEX,
+            # 0.9,
+            # (0, 0, 255),
+            # 2,
+            # )
             cv2.putText(
                 final_img,
                 "o",
@@ -107,6 +105,7 @@ class PlayerDetector:
                 (0, 0, 255),
                 2,
             )
+        print(jersey_detector.get_teams_from_histogram(player_imgs))
         self.display_image(final_img)
         return player_positions
 
