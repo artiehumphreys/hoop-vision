@@ -6,13 +6,14 @@ from PIL import Image
 from shapely.geometry import Point, Polygon
 from torchvision import transforms as T
 
-from detection import jersey_detector, roboflow_detector
+from detection.jersey_detector import JerseyDetector
 
 
 class PlayerDetector:
     def __init__(self, image_loader, court_bounds):
         self.image_loader = image_loader
         self.court_bounds = court_bounds
+        self.collected = False
 
     def is_in_court(self, player_positions):
         court_polygon = Polygon(
@@ -70,6 +71,7 @@ class PlayerDetector:
         return self.process_player_masks(image_path, boxes, filtered_masks)
 
     def process_player_masks(self, image_path, boxes, filtered_masks):
+        global collected
         original_img = cv2.imread(image_path)
         original_img_hsv = cv2.cvtColor(original_img, cv2.COLOR_BGR2HSV)
         final_img = original_img.copy()
@@ -86,7 +88,7 @@ class PlayerDetector:
             colored_mask = np.zeros_like(original_img)
             colored_mask[:, :, 0] = play_mask
             final_img = cv2.addWeighted(final_img, 1, colored_mask, 0.5, 0)
-            player_positions.append(((boxes[i, 2].item(), boxes[i, 3].item()), team))
+            player_positions.append(((boxes[i, 2].item(), boxes[i, 3].item()), ""))
             # cv2.putText(
             # final_img,
             # team,
@@ -105,7 +107,12 @@ class PlayerDetector:
                 (0, 0, 255),
                 2,
             )
-        print(jersey_detector.get_teams_from_histogram(player_imgs))
+        if len(player_imgs) >= 9 and not self.collected:
+            detector = JerseyDetector(player_imgs)
+            top_bins, histogram = detector.create_histogram()
+            print("Top bins:", top_bins)
+            print("Histogram:", histogram)
+            self.collected = True
         self.display_image(final_img)
         return player_positions
 

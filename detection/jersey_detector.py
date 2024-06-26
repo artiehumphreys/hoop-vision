@@ -9,28 +9,26 @@ class JerseyDetector:
         self.lower_white = np.array([80, 50, 150])
         self.upper_white = np.array([200, 150, 255])
         self.player_imgs = player_imgs
+        self.histogram = None
 
     def create_histogram(self):
         hist_size = 16
+        histogram = np.zeros(hist_size)
         h_bins = np.linspace(0, 256, hist_size + 1)
-        histogram = np.zeros_like(h_bins)
+
         for player_img in self.player_imgs:
-            player_hsv = cv2.cvtColor(player_img, BGR2HSV)
-            hue_channel, _, _ = cv2.split(player_hsv)
-            width, height = hue_channel.shape
-            for i in range(height):
-                for j in range(width):
-                    h_value = hue_channel[i, j]
-                    h_bin = np.digitize(h_value, h_bins) - 1
-                    histogram[h_bin] += 1
+            player_hsv = cv2.cvtColor(player_img, cv2.COLOR_BGR2HSV)
+            hue_channel = player_hsv[:, :, 0]
 
-        dominant_bin = np.unravel_index(
-            np.argmax(histogram, axis=None), histogram.shape
-        )
+            hist, _ = np.histogram(hue_channel, bins=h_bins)
+            histogram += hist
 
-        h_bin_center = (h_bins[dominant_bin[0]] + h_bins[dominant_bin[0] + 1]) / 2
+        self.histogram = histogram
 
-        return h_bin_center
+    def get_teams(self):
+        top_bins = np.argsort(self.histogram)[::-1][:3]
+        for player_img in self.player_imgs:
+            
 
     def get_teams_from_jersey(self, player_img):
         player_hsv = cv2.cvtColor(player_img, cv2.COLOR_BGR2HLS)

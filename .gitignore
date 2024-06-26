@@ -10,7 +10,7 @@ results/
 __pycache__/
 *.py[cod]
 *$py.class
-.swp
+*.swp
 
 # C extensions
 *.so
