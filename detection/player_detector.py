@@ -97,12 +97,10 @@ class PlayerDetector:
                 (0, 0, 255),
                 2,
             )
-        if not self.collected:
-            detector = JerseyDetector(player_imgs=player_imgs)
-            if len(player_imgs) >= 9:
-                detector.create_histogram()
-                self.collected = True
-            teams = detector.get_teams()
+        if len(player_imgs) >= 9:
+            self.player_imgs = player_imgs
+            detector = JerseyDetector(player_imgs)
+            teams = detector.assign_teams()
         for i in range(len(teams)):
             player_positions[i][1] = teams[i]
             cv2.putText(
