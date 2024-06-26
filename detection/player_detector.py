@@ -80,7 +80,6 @@ class PlayerDetector:
         for i in range(filtered_masks.shape[0]):
             mask = filtered_masks[i, 0] > 0.5
             play_mask = mask.numpy().astype("uint8") * 255
-
             player_img = cv2.bitwise_and(
                 original_img_hsv, original_img_hsv, mask=play_mask
             )
@@ -88,16 +87,7 @@ class PlayerDetector:
             colored_mask = np.zeros_like(original_img)
             colored_mask[:, :, 0] = play_mask
             final_img = cv2.addWeighted(final_img, 1, colored_mask, 0.5, 0)
-            player_positions.append(((boxes[i, 2].item(), boxes[i, 3].item()), ""))
-            # cv2.putText(
-            # final_img,
-            # team,
-            # (int(boxes[i, 0].item()), int(boxes[i, 1].item())),
-            # cv2.FONT_HERSHEY_COMPLEX,
-            # 0.9,
-            # (0, 0, 255),
-            # 2,
-            # )
+            player_positions.append([(boxes[i, 2].item(), boxes[i, 3].item()), ""])
             cv2.putText(
                 final_img,
                 "o",
@@ -107,12 +97,23 @@ class PlayerDetector:
                 (0, 0, 255),
                 2,
             )
-        if len(player_imgs) >= 9 and not self.collected:
-            detector = JerseyDetector(player_imgs)
-            top_bins, histogram = detector.create_histogram()
-            print("Top bins:", top_bins)
-            print("Histogram:", histogram)
-            self.collected = True
+        if not self.collected:
+            detector = JerseyDetector(player_imgs=player_imgs)
+            if len(player_imgs) >= 9:
+                detector.create_histogram()
+                self.collected = True
+            teams = detector.get_teams()
+        for i in range(len(teams)):
+            player_positions[i][1] = teams[i]
+            cv2.putText(
+                final_img,
+                str(player_positions[i][1]),
+                (int(boxes[i, 0].item()), int(boxes[i, 1].item())),
+                cv2.FONT_HERSHEY_COMPLEX,
+                0.9,
+                (0, 0, 255),
+                2,
+            )
         self.display_image(final_img)
         return player_positions
 

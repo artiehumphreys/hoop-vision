@@ -1,5 +1,9 @@
+import sys
+
 import cv2
 import numpy as np
+
+np.set_printoptions(threshold=sys.maxsize)
 
 
 class JerseyDetector:
@@ -12,23 +16,36 @@ class JerseyDetector:
         self.histogram = None
 
     def create_histogram(self):
-        hist_size = 16
+        hist_size = 32
         histogram = np.zeros(hist_size)
         h_bins = np.linspace(0, 256, hist_size + 1)
 
         for player_img in self.player_imgs:
-            player_hsv = cv2.cvtColor(player_img, cv2.COLOR_BGR2HSV)
-            hue_channel = player_hsv[:, :, 0]
-
-            hist, _ = np.histogram(hue_channel, bins=h_bins)
+            hue_channel = player_img[:, :, 0]
+            non_zero_hue = hue_channel[hue_channel > 0]
+            hist, _ = np.histogram(non_zero_hue, bins=h_bins)
             histogram += hist
-
         self.histogram = histogram
 
     def get_teams(self):
         top_bins = np.argsort(self.histogram)[::-1][:3]
+        hsv_ranges = [(bin * 8, (bin + 1) * 8) for bin in top_bins]
+        teams = ["team1", "team2", "team3"]
+        player_teams = []
+        print(hsv_ranges)
         for player_img in self.player_imgs:
-            
+            team = "TBD"
+            hue_channel = player_img[:, :, 1]
+            non_zero_hue = hue_channel[hue_channel > 0]
+            dominant_hue = np.median(non_zero_hue)
+            print(dominant_hue)
+            for j, (low, high) in enumerate(hsv_ranges):
+                if low <= dominant_hue <= high:
+                    team = teams[j]
+                    break
+
+            player_teams.append(dominant_hue)
+        return player_teams
 
     def get_teams_from_jersey(self, player_img):
         player_hsv = cv2.cvtColor(player_img, cv2.COLOR_BGR2HLS)
