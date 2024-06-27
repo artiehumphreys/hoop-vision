@@ -33,6 +33,31 @@ class PlayerDetector:
 
         return in_court
 
+    def non_maximum_suppression(self, boxes, scores):
+        combined = list(zip(boxes, scores))
+        combined.sort(key=lambda x: x[0][0])
+        boxes, scores = zip(*combined)
+        valid_indices = []
+        iou_thresh = 0.75
+        for i in range(len(boxes) - 1):
+            x_overlap = boxes[i + 1][0] - boxes[i][1]
+            y_overlap = boxes[i + 1][2] - boxes[i][3]
+            overlap_area = x_overlap * y_overlap
+            total_area = (
+                (boxes[i][1] - boxes[i][0]) * (boxes[i][3] - boxes[i][2])
+                + (boxes[i + 1][1] - boxes[i + 1][0])
+                * (boxes[i + 1][3] - boxes[i + 1][2])
+                - overlap_area
+            )
+            if overlap_area / total_area >= iou_thresh:
+                if scores[i] < scores[i + 1]:
+                    valid_indices.append(i + 1)
+                    continue
+            if valid_indices and valid_indices[-1] == i:
+                continue
+            valid_indices.append(i)
+        return valid_indices
+
     def detect_players_with_mask_rcnn(self, image_path: str):
         model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(
             weights=torchvision.models.detection.MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1
@@ -51,6 +76,9 @@ class PlayerDetector:
         player_indices = labels == 1
         boxes = pred[0]["boxes"][high_conf_indices][player_indices]
         masks = pred[0]["masks"][high_conf_indices][player_indices]
+        scores = scores[high_conf_indices][player_indices]
+        print(len(boxes))
+        print(self.non_maximum_suppression(boxes, scores))
 
         player_positions = [
             (boxes[i, 2].item(), boxes[i, 3].item()) for i in range(len(boxes))
