@@ -80,9 +80,4 @@ def detect_court_boundary(image):
         average_vertex += vertex
     average_vertex /= len(vertex_history)
 
-    cv2.drawContours(image, [vertices], -1, (0, 255, 0), 2)
-    cv2.imshow("hull", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
     return vertices, average_vertex
