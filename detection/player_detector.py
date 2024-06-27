@@ -33,43 +33,31 @@ class PlayerDetector:
 
         return in_court
 
-    def non_maximum_suppression(self, boxes, scores):
-        combined = list(zip(boxes, scores))
-        combined.sort(key=lambda x: x[0][0])
-        boxes, scores = zip(*combined)
+    def non_maximum_suppression(masks, scores, iou_thresh=0.5):
+
+        def calculate_mask_iou(mask1, mask2):
+            intersection = (mask1 & mask2).float().sum((1, 2))
+            union = (mask1 | mask2).float().sum((1, 2))
+            iou = intersection / union
+            return iou
+
+        combined = list(zip(masks, scores))
+        combined.sort(key=lambda x: x[1], reverse=True)
+        masks, scores = zip(*combined)
+
+        masks = torch.stack(masks)
+        scores = torch.tensor(scores)
+
         valid_indices = []
-        iou_thresh = 0.5
-        for i in range(len(boxes) - 1):
-            # https://stackoverflow.com/questions/27152904/calculate-overlapped-area-between-two-rectangles
-            x_overlap = max(
-                (min(boxes[i][1], boxes[i + 1][1]) - max(boxes[i][0], boxes[i + 1][0])),
-                0,
-            )
-            y_overlap = max(
-                (min(boxes[i][3], boxes[i + 1][3]) - max(boxes[i][2], boxes[i + 1][2])),
-                0,
-            )
-            overlap_area = x_overlap * y_overlap
+        for i in range(len(masks)):
+            keep = True
+            for j in range(len(valid_indices)):
+                if calculate_mask_iou(masks[i], masks[valid_indices[j]]) > iou_thresh:
+                    keep = False
+                    break
+            if keep:
+                valid_indices.append(i)
 
-            box1_area = abs((boxes[i][1] - boxes[i][0]) * (boxes[i][3] - boxes[i][2]))
-            box2_area = abs(
-                (boxes[i + 1][1] - boxes[i + 1][0])
-                * (boxes[i + 1][3] - boxes[i + 1][2])
-            )
-
-            total_area = box1_area + box2_area - overlap_area
-
-            if iou_thresh <= overlap_area / total_area:
-                print(i, i + 1)
-                print(f"Overlap Area: {overlap_area}")
-                print(f"Total Area: {total_area}")
-                if scores[i] < scores[i + 1]:
-                    valid_indices.append(i + 1)
-                    continue
-            if valid_indices and valid_indices[-1] == i:
-                continue
-            valid_indices.append(i)
-        print(valid_indices)
         return valid_indices
 
     def detect_players_with_mask_rcnn(self, image_path: str):
@@ -91,7 +79,7 @@ class PlayerDetector:
         boxes = pred[0]["boxes"][high_conf_indices][player_indices]
         masks = pred[0]["masks"][high_conf_indices][player_indices]
         scores = scores[high_conf_indices][player_indices]
-        non_overlapped_indices = self.non_maximum_suppression(boxes, scores)
+        non_overlapped_indices = self.non_maximum_suppression(masks, scores)
         boxes = boxes[non_overlapped_indices]
         masks = masks[non_overlapped_indices]
 
