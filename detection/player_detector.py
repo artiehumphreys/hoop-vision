@@ -38,24 +38,38 @@ class PlayerDetector:
         combined.sort(key=lambda x: x[0][0])
         boxes, scores = zip(*combined)
         valid_indices = []
-        iou_thresh = 0.75
+        iou_thresh = 0.5
         for i in range(len(boxes) - 1):
-            x_overlap = boxes[i + 1][0] - boxes[i][1]
-            y_overlap = boxes[i + 1][2] - boxes[i][3]
-            overlap_area = x_overlap * y_overlap
-            total_area = (
-                (boxes[i][1] - boxes[i][0]) * (boxes[i][3] - boxes[i][2])
-                + (boxes[i + 1][1] - boxes[i + 1][0])
-                * (boxes[i + 1][3] - boxes[i + 1][2])
-                - overlap_area
+            # https://stackoverflow.com/questions/27152904/calculate-overlapped-area-between-two-rectangles
+            x_overlap = max(
+                (min(boxes[i][1], boxes[i + 1][1]) - max(boxes[i][0], boxes[i + 1][0])),
+                0,
             )
-            if overlap_area / total_area >= iou_thresh:
+            y_overlap = max(
+                (min(boxes[i][3], boxes[i + 1][3]) - max(boxes[i][2], boxes[i + 1][2])),
+                0,
+            )
+            overlap_area = x_overlap * y_overlap
+
+            box1_area = abs((boxes[i][1] - boxes[i][0]) * (boxes[i][3] - boxes[i][2]))
+            box2_area = abs(
+                (boxes[i + 1][1] - boxes[i + 1][0])
+                * (boxes[i + 1][3] - boxes[i + 1][2])
+            )
+
+            total_area = box1_area + box2_area - overlap_area
+
+            if iou_thresh <= overlap_area / total_area:
+                print(i, i + 1)
+                print(f"Overlap Area: {overlap_area}")
+                print(f"Total Area: {total_area}")
                 if scores[i] < scores[i + 1]:
                     valid_indices.append(i + 1)
                     continue
             if valid_indices and valid_indices[-1] == i:
                 continue
             valid_indices.append(i)
+        print(valid_indices)
         return valid_indices
 
     def detect_players_with_mask_rcnn(self, image_path: str):
@@ -77,7 +91,6 @@ class PlayerDetector:
         boxes = pred[0]["boxes"][high_conf_indices][player_indices]
         masks = pred[0]["masks"][high_conf_indices][player_indices]
         scores = scores[high_conf_indices][player_indices]
-        print(self.non_maximum_suppression(boxes, scores))
         non_overlapped_indices = self.non_maximum_suppression(boxes, scores)
         boxes = boxes[non_overlapped_indices]
         masks = masks[non_overlapped_indices]
