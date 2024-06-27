@@ -77,8 +77,10 @@ class PlayerDetector:
         boxes = pred[0]["boxes"][high_conf_indices][player_indices]
         masks = pred[0]["masks"][high_conf_indices][player_indices]
         scores = scores[high_conf_indices][player_indices]
-        print(len(boxes))
         print(self.non_maximum_suppression(boxes, scores))
+        non_overlapped_indices = self.non_maximum_suppression(boxes, scores)
+        boxes = boxes[non_overlapped_indices]
+        masks = masks[non_overlapped_indices]
 
         player_positions = [
             (boxes[i, 2].item(), boxes[i, 3].item()) for i in range(len(boxes))
