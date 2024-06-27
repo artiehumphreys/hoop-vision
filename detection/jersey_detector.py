@@ -1,3 +1,4 @@
+import math
 import sys
 
 import cv2
@@ -54,10 +55,9 @@ class JerseyDetector:
             _, cr_channel, _ = cv2.split(player_img)
             non_zero_cr = cr_channel[cr_channel > 0]
             dominant_cr = np.median(non_zero_cr)
-            print(f"dominant: {dominant_cr}")
             team = "Referee"
             for j, (low, high) in enumerate(teams_hue_ranges):
-                if low <= dominant_cr <= high:
+                if low <= dominant_cr < math.floor(high):
                     team = teams[j]
                     break
             player_teams.append(team)

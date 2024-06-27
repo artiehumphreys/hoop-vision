@@ -18,7 +18,7 @@ class PlayerDetector:
         court_polygon = Polygon(
             [
                 (
-                    (point[0], point[1] + 20)
+                    (point[0], point[1] + 25)
                     if point[1] < 360
                     else (point[0], point[1] - 10)
                 )
@@ -44,7 +44,7 @@ class PlayerDetector:
         with torch.no_grad():
             pred = model([transformed_img])
 
-        threshold = 0.55
+        threshold = 0.7
         scores = pred[0]["scores"]
         high_conf_indices = scores > threshold
         labels = pred[0]["labels"][high_conf_indices]
@@ -58,12 +58,7 @@ class PlayerDetector:
 
         in_court = self.is_in_court(player_positions)
 
-        filtered_boxes = [
-            i
-            for i in range(len(in_court))
-            if in_court[i]
-            and (boxes[i, 3] - boxes[i, 1]) >= 1.25 * (boxes[i, 2] - boxes[i, 0])
-        ]
+        filtered_boxes = [i for i in range(len(in_court)) if in_court[i]]
         filtered_masks = masks[filtered_boxes]
         boxes = boxes[filtered_boxes]
 
@@ -98,7 +93,7 @@ class PlayerDetector:
             )
         self.player_imgs = player_imgs
         jersey_detector = JerseyDetector(player_imgs)
-        teams = self.jersey_detector.assign_teams()
+        teams = jersey_detector.assign_teams()
         for i in range(len(teams)):
             player_positions[i][1] = teams[i]
             cv2.putText(
