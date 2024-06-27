@@ -13,6 +13,9 @@ class JerseyDetector:
         self.histogram = None
         self.peak_hues = []
 
+    def set_player_imgs(self, player_imgs):
+        self.player_imgs = player_imgs
+
     # https://cliveunger.github.io/pdfs/Basketball_Player_Tracking.pdf
     def find_peak_hues(self):
         peak_hues = []
@@ -37,7 +40,7 @@ class JerseyDetector:
 
         kmeans = KMeans(n_clusters=2).fit(np.array(self.peak_hues).reshape(-1, 1))
         cluster_centers = kmeans.cluster_centers_.flatten()
-        teams_hue_ranges = [(center - 15, center + 15) for center in cluster_centers]
+        teams_hue_ranges = [(center - 12, center + 12) for center in cluster_centers]
 
         return teams_hue_ranges
 
