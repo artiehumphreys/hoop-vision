@@ -33,14 +33,17 @@ class PlayerDetector:
 
         return in_court
 
-    def non_maximum_suppression(masks, scores, iou_thresh=0.5):
+    def non_maximum_suppression(self, masks, scores):
 
         def calculate_mask_iou(mask1, mask2):
+            mask1 = mask1 > 0.5
+            mask2 = mask2 > 0.5
             intersection = (mask1 & mask2).float().sum((1, 2))
             union = (mask1 | mask2).float().sum((1, 2))
             iou = intersection / union
             return iou
 
+        iou_thresh = 0.25
         combined = list(zip(masks, scores))
         combined.sort(key=lambda x: x[1], reverse=True)
         masks, scores = zip(*combined)
