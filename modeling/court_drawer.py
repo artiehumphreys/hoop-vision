@@ -6,11 +6,11 @@ import numpy as np
 
 
 class CourtDrawer:
-    def __init__(self, color="black", lw=2):
+    def __init__(self, img_loader, color="black", lw=2):
         self.color = color
         self.lw = lw
         self.path = "/Users/artiehumphreys/Desktop/Object Detection/full-court.jpeg"
-        self.img = ImageLoader(self.path).load_image()
+        self.img = img_loader
         self.homography_calculator = HomographyCalculator()
         self.right_bounds = np.array(
             [

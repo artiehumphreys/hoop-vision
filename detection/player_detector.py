@@ -1,3 +1,6 @@
+import datetime
+from functools import cache
+
 import cv2
 import numpy as np
 import torch
@@ -10,9 +13,13 @@ from detection.jersey_detector import JerseyDetector
 
 
 class PlayerDetector:
-    def __init__(self, image_loader, court_bounds):
-        self.image_loader = image_loader
+    def __init__(self, court_bounds):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.court_bounds = court_bounds
+        self.model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(
+            weights=torchvision.models.detection.MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1
+        ).to(self.device)
+        self.model.eval()
 
     def is_in_court(self, player_positions):
         court_polygon = Polygon(
@@ -33,8 +40,8 @@ class PlayerDetector:
 
         return in_court
 
+    @cache
     def non_maximum_suppression(self, masks, scores):
-
         def calculate_mask_iou(mask1, mask2):
             mask1 = mask1 > 0.5
             mask2 = mask2 > 0.5
@@ -64,16 +71,15 @@ class PlayerDetector:
         return valid_indices
 
     def detect_players_with_mask_rcnn(self, image_path: str):
-        model = torchvision.models.detection.maskrcnn_resnet50_fpn_v2(
-            weights=torchvision.models.detection.MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1
-        )
-        model.eval()
+        start = datetime.datetime.now()
+        print(f"beginning detection: {start}")
         img = Image.open(image_path)
         transform = T.ToTensor()
         transformed_img = transform(img)
         with torch.no_grad():
-            pred = model([transformed_img])
-
+            pred = self.model([transformed_img])
+        end = datetime.datetime.now()
+        print(f"ended detection: {end - start}")
         threshold = 0.7
         scores = pred[0]["scores"]
         high_conf_indices = scores > threshold
