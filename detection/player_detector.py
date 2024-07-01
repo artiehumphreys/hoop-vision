@@ -50,7 +50,7 @@ class PlayerDetector:
             iou = intersection / union
             return iou
 
-        iou_thresh = 0.25
+        iou_thresh = 0.3
         combined = list(zip(masks, scores))
         combined.sort(key=lambda x: x[1], reverse=True)
         masks, scores = zip(*combined)
@@ -80,7 +80,7 @@ class PlayerDetector:
             pred = self.model([transformed_img])
         end = datetime.datetime.now()
         print(f"ended detection: {end - start}")
-        threshold = 0.7
+        threshold = 0.6
         scores = pred[0]["scores"]
         high_conf_indices = scores > threshold
         labels = pred[0]["labels"][high_conf_indices]
